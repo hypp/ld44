@@ -9,8 +9,8 @@ function Main() {
 
     //Create a Pixi Application
     let app = new Application({ 
-        width: 256, 
-        height: 256,                       
+        width: 640, 
+        height: 480,                       
         antialias: true, 
         transparent: false, 
         resolution: 1
@@ -43,19 +43,61 @@ function Main() {
         app.stage.addChild(cat);
 
 
+        // 20x15
+        level = [
+            -1,-1,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1,-1,-1,-1,
+            -1,-1,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1,-1,-1,-1,
+            -1,-1,-1,-1,-1, -1, 2, 1, 1, 1,  1, 3,-1,-1,-1,  2, 1, 3,-1,-1,
+            -1,-1,-1,-1,-1, -1, 0,-1,-1,-1, -1, 0,-1,-1,-1,  0,-1, 0,-1,-1,
+            -1,-1,-1,-1,-1, -1, 0,-1,-1,-1, -1, 4, 1, 1, 1,  5,-1, 0,-1,-1,
+
+            -1,-1,-1,-1,-1, -1, 0,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1, 0,-1,-1,
+            -1,-1,-1,-1,-1, -1, 0,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1, 0,-1,-1,
+            -1,-1,-1,-1,-1, -1, 0,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1, 0,-1,-1,
+            -1,-1,-1,-1,-1, -1, 4, 1, 3,-1,  2, 1, 1, 1, 1,  1, 1, 5,-1,-1,
+            -1, 2, 1, 1, 1,  3,-1,-1, 0,-1,  0,-1,-1,-1,-1, -1,-1,-1,-1,-1,
+
+            -1, 0,-1,-1,-1,  4, 1, 1, 5,-1,  4, 1, 1, 1, 1,  3,-1,-1,-1,-1,
+            -1, 0,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1,-1,-1,-1,  0,-1,-1,-1,-1,
+            -1, 4, 1, 1, 1,  1, 1, 1, 1, 3, -1, 2, 1, 1, 1,  5,-1,-1,-1,-1,
+            -1,-1,-1,-1,-1, -1,-1,-1,-1, 0, -1, 0,-1,-1,-1, -1,-1,-1,-1,-1,
+            -1,-1,-1,-1,-1, -1,-1,-1,-1, 4,  1, 5,-1,-1,-1, -1,-1,-1,-1,-1,
+        ]
+
+        roadList = [];
+
         //Create the `tileset` sprite from the texture
         let baseTexture = PIXI.BaseTexture.fromImage("resources/roadtiles.png");
-        let rectangle = new PIXI.Rectangle(0, 0, 32, 32);
-        let texture = new PIXI.Texture(baseTexture, rectangle);
 
-        //Create the sprite from the texture
-        let road = new Sprite(texture);
+        for (let y = 0; y < baseTexture.height; y += 32) {
+            for (let x = 0; x < baseTexture.width; x += 32) {
+                let rectangle = new PIXI.Rectangle(x, y, 32, 32);
+                let roadTexture = new PIXI.Texture(baseTexture, rectangle);
+        
+                roadList.push(roadTexture);
+            }
+        }
 
-        //Position the rocket sprite on the canvas
-        road.x = 132;
-        road.y = 132;
+        for (let i = 0; i < 15; i++) {
+            let y = i * 32;
+            for (let j = 0; j < 20; j++) {
+                let x = j*32;
+                let idx = i*20+j;
+                let tile = level[idx];
+                if (tile >= 0) {
+                    let roadTexture = roadList[tile];
 
-        app.stage.addChild(road)
+                    //Create the sprite from the texture
+                    let road = new Sprite(roadTexture);
+            
+                    road.x = x;
+                    road.y = y;
+            
+                    app.stage.addChild(road)
+                }
+            }    
+        }
+
     }
 
     this.scroller = new Scroller(this.stage);
