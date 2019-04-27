@@ -1,6 +1,6 @@
 
 
-
+// Utility function to split png into tiles
 function tilesFromImage(img, width, height) {
     let tiles = [];
 
@@ -17,6 +17,54 @@ function tilesFromImage(img, width, height) {
     }
 
     return tiles;
+}
+
+// Utility function for keyboard
+function keyboard(value) {
+    let key = {};
+    key.value = value;
+    key.isDown = false;
+    key.isUp = true;
+    key.press = undefined;
+    key.release = undefined;
+    //The `downHandler`
+    key.downHandler = event => {
+      if (event.key === key.value) {
+        if (key.isUp && key.press) key.press();
+        key.isDown = true;
+        key.isUp = false;
+        event.preventDefault();
+      }
+    };
+  
+    //The `upHandler`
+    key.upHandler = event => {
+      if (event.key === key.value) {
+        if (key.isDown && key.release) key.release();
+        key.isDown = false;
+        key.isUp = true;
+        event.preventDefault();
+      }
+    };
+  
+    //Attach event listeners
+    const downListener = key.downHandler.bind(key);
+    const upListener = key.upHandler.bind(key);
+    
+    window.addEventListener(
+      "keydown", downListener, false
+    );
+    window.addEventListener(
+      "keyup", upListener, false
+    );
+    
+    // Detach event listeners
+    key.unsubscribe = () => {
+      window.removeEventListener("keydown", downListener);
+      window.removeEventListener("keyup", upListener);
+    };
+    
+    return key;
 }
 
 
@@ -50,6 +98,7 @@ function Main() {
 }
 
 Main.SCROLL_SPEED = 5;
+Main.ROTATION_SPEED = 1;
 
 Main.prototype.update = function() {
     this.scroller.moveViewportXBy(Main.SCROLL_SPEED);
@@ -57,6 +106,19 @@ Main.prototype.update = function() {
 };
 
 Main.prototype.gameLoop = function(delta) {
+
+
+
+    if (this.left.isDown) {
+        this.car.angle = (this.car.angle - Main.ROTATION_SPEED / delta) % 360;
+    }
+    if (this.right.isDown) {
+        this.car.angle = (this.car.angle + Main.ROTATION_SPEED / delta) % 360;
+    }
+
+    this.car.rotation = this.car.angle * Math.PI / 180.0;
+
+
     this.update();
 }
 
@@ -109,14 +171,74 @@ Main.prototype.setup = function() {
     let carTexture = carList[0];
 
     //Create the sprite from the texture
-    let car = new PIXI.Sprite(carTexture);
+    this.car = new PIXI.Sprite(carTexture);
 
-    car.x = 32*6+(32-16)/2;
-    car.y = 32*5;
+    this.car.x = 32*6+16;
+    this.car.y = 32*5;
+    this.car.anchor.set(0.5, 0.5);
+    this.car.angle = 0.0;
 
-    this.app.stage.addChild(car)
+    this.app.stage.addChild(this.car)
 
     this.scroller = new Scroller(this.stage);
+
+    //Capture the keyboard arrow keys
+    this.left = keyboard("ArrowLeft"),
+    this.up = keyboard("ArrowUp"),
+    this.right = keyboard("ArrowRight"),
+    this.down = keyboard("ArrowDown");
+
+    /*
+    //Left arrow key `press` method
+    left.press = () => {
+        //Change the cat's velocity when the key is pressed
+        cat.vx = -5;
+        cat.vy = 0;
+    };
+    
+    //Left arrow key `release` method
+    left.release = () => {
+        //If the left arrow has been released, and the right arrow isn't down,
+        //and the cat isn't moving vertically:
+        //Stop the cat
+        if (!right.isDown && cat.vy === 0) {
+        cat.vx = 0;
+        }
+    };
+
+    //Up
+    up.press = () => {
+        cat.vy = -5;
+        cat.vx = 0;
+    };
+    up.release = () => {
+        if (!down.isDown && cat.vx === 0) {
+        cat.vy = 0;
+        }
+    };
+
+    //Right
+    right.press = () => {
+        cat.vx = 5;
+        cat.vy = 0;
+    };
+    right.release = () => {
+        if (!left.isDown && cat.vy === 0) {
+        cat.vx = 0;
+        }
+    };
+
+    //Down
+    down.press = () => {
+        cat.vy = 5;
+        cat.vx = 0;
+    };
+    down.release = () => {
+        if (!up.isDown && cat.vx === 0) {
+        cat.vy = 0;
+        }
+    };
+*/
 
     this.app.ticker.add(this.gameLoop.bind(this));
 }
