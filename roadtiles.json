@@ -1,0 +1,12 @@
+{ "columns":2,
+ "image":"..\/img\/map\/roadtiles.png",
+ "imageheight":128,
+ "imagewidth":64,
+ "margin":0,
+ "name":"roadtiles",
+ "spacing":0,
+ "tilecount":8,
+ "tileheight":32,
+ "tilewidth":32,
+ "type":"tileset"
+}
