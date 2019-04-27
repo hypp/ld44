@@ -96,42 +96,44 @@ function Main() {
 
 Main.SCROLL_SPEED = 5;
 Main.ROTATION_SPEED = 3;
-Main.FORWARD_SPEED = 2.1;
+Main.MAX_FORWARD_SPEED = 2.1;
 Main.LEVEL_WIDTH = 20;
 Main.LEVEL_HEIGHT = 15;
 Main.LEVEL_TILE_WIDTH = 32;
 Main.LEVEL_TILE_HEIGHT = 32;
 
 Main.prototype.update = function() {
-    this.scroller.moveViewportXBy(Main.SCROLL_SPEED);
+    //this.scroller.moveViewportXBy(Main.SCROLL_SPEED);
     this.app.renderer.render(this.stage);
 };
 
 Main.prototype.gameLoop = function(delta) {
 
 
+    if (this.up.isDown) {
+        this.car.speed += 1.15;
+        if (this.car.speed > Main.MAX_FORWARD_SPEED) {
+            this.car.speed = Main.MAX_FORWARD_SPEED;
+        }
 
-    if (this.left.isDown) {
-        this.car.angle = (this.car.angle - Main.ROTATION_SPEED / delta) % 360;
-    }
-    if (this.right.isDown) {
-        this.car.angle = (this.car.angle + Main.ROTATION_SPEED / delta) % 360;
+        if (this.left.isDown) {
+            this.car.angle = (this.car.angle - Main.ROTATION_SPEED / delta) % 360;
+        }
+        if (this.right.isDown) {
+            this.car.angle = (this.car.angle + Main.ROTATION_SPEED / delta) % 360;
+        }
+    
+    } else {
+        this.car.speed -= 0.1;
+        if (this.car.speed < 0.01) {
+            this.car.speed = 0;
+        }
     }
 
     this.car.rotation = this.car.angle * Math.PI / 180.0;
 
-    if (this.up.isDown) {
-        this.car.vx = Math.cos(this.car.rotation - Math.PI/2) * Main.FORWARD_SPEED;
-        this.car.vy = Math.sin(this.car.rotation - Math.PI/2) * Main.FORWARD_SPEED;
-    } else {
-        this.car.vx *= 0.9;
-        this.car.vy *= 0.9;
-
-        if (this.car.vx < 0.01 || this.car.vy < 0.01) {
-            this.car.vx = 0.0;
-            this.car.vy = 0.0;
-        } 
-    }
+    this.car.vx = Math.cos(this.car.rotation - Math.PI/2) * this.car.speed;
+    this.car.vy = Math.sin(this.car.rotation - Math.PI/2) * this.car.speed;
 
     newx = this.car.x + this.car.vx;
     newy = this.car.y + this.car.vy;
@@ -224,6 +226,7 @@ Main.prototype.setup = function() {
 
     this.car.x = 32*6+16;
     this.car.y = 32*5;
+    this.car.speed = 0;
     this.car.vx = 0;
     this.car.vy = 0;
     this.car.anchor.set(0.5, 0.5);
@@ -231,7 +234,7 @@ Main.prototype.setup = function() {
 
     this.app.stage.addChild(this.car)
 
-    this.scroller = new Scroller(this.stage);
+    //this.scroller = new Scroller(this.stage);
 
     //Capture the keyboard arrow keys
     this.left = keyboard("ArrowLeft"),
