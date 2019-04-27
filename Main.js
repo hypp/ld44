@@ -72,8 +72,8 @@ function Main() {
 
     //Create a Pixi Application
     let app = new PIXI.Application({ 
-        width: 640, 
-        height: 480,                       
+        width: Main.LEVEL_TILE_WIDTH*Main.LEVEL_WIDTH, 
+        height: Main.LEVEL_TILE_HEIGHT*Main.LEVEL_HEIGHT,                       
         antialias: true, 
         transparent: false, 
         resolution: 1
@@ -99,8 +99,8 @@ Main.ROTATION_SPEED = 3;
 Main.MAX_FORWARD_SPEED = 2.1;
 Main.LEVEL_WIDTH = 20;
 Main.LEVEL_HEIGHT = 15;
-Main.LEVEL_TILE_WIDTH = 32;
-Main.LEVEL_TILE_HEIGHT = 32;
+Main.LEVEL_TILE_WIDTH = 40;
+Main.LEVEL_TILE_HEIGHT = 40;
 
 Main.prototype.update = function() {
     //this.scroller.moveViewportXBy(Main.SCROLL_SPEED);
@@ -195,7 +195,7 @@ Main.prototype.setup = function() {
         -1,-1,-1,-1,-1, -1,-1,-1,-1, 4,  1, 5,-1,-1,-1, -1,-1,-1,-1,-1,
     ]
 
-    roadList = tilesFromImage("resources/roadtiles.png", 32, 32);
+    roadList = tilesFromImage("resources/roadtiles.png", Main.LEVEL_TILE_WIDTH, Main.LEVEL_TILE_HEIGHT);
 
     for (let i = 0; i < Main.LEVEL_HEIGHT; i++) {
         let y = i * Main.LEVEL_TILE_HEIGHT;
@@ -224,8 +224,8 @@ Main.prototype.setup = function() {
     //Create the sprite from the texture
     this.car = new PIXI.Sprite(carTexture);
 
-    this.car.x = 32*6+16;
-    this.car.y = 32*5;
+    this.car.x = Main.LEVEL_TILE_WIDTH*6+16;
+    this.car.y = Main.LEVEL_TILE_HEIGHT*5;
     this.car.speed = 0;
     this.car.vx = 0;
     this.car.vy = 0;
@@ -241,58 +241,6 @@ Main.prototype.setup = function() {
     this.up = keyboard("ArrowUp"),
     this.right = keyboard("ArrowRight"),
     this.down = keyboard("ArrowDown");
-
-    /*
-    //Left arrow key `press` method
-    left.press = () => {
-        //Change the cat's velocity when the key is pressed
-        cat.vx = -5;
-        cat.vy = 0;
-    };
-    
-    //Left arrow key `release` method
-    left.release = () => {
-        //If the left arrow has been released, and the right arrow isn't down,
-        //and the cat isn't moving vertically:
-        //Stop the cat
-        if (!right.isDown && cat.vy === 0) {
-        cat.vx = 0;
-        }
-    };
-
-    //Up
-    up.press = () => {
-        cat.vy = -5;
-        cat.vx = 0;
-    };
-    up.release = () => {
-        if (!down.isDown && cat.vx === 0) {
-        cat.vy = 0;
-        }
-    };
-
-    //Right
-    right.press = () => {
-        cat.vx = 5;
-        cat.vy = 0;
-    };
-    right.release = () => {
-        if (!left.isDown && cat.vy === 0) {
-        cat.vx = 0;
-        }
-    };
-
-    //Down
-    down.press = () => {
-        cat.vy = 5;
-        cat.vx = 0;
-    };
-    down.release = () => {
-        if (!up.isDown && cat.vx === 0) {
-        cat.vy = 0;
-        }
-    };
-*/
 
     this.app.ticker.add(this.gameLoop.bind(this));
 }
