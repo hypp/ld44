@@ -7,32 +7,16 @@
         canvas { background-color: #222222; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
-    <script src="pixi-tiledmap.min.js"></script>
     <script src="Far.js"></script>
     <script src="Mid.js"></script>
     <script src="Scroller.js"></script>
     <script src="Main.js"></script>
   </head>
   <body onload="init();">
-    <div align="center">
-      <canvas id="game-canvas" width="512" height="384"></canvas>
-    </div>
 
     <script>
         function init() {
             main = new Main();
-
-            PIXI.loader
-            .add('resources/level1.tmx')
-            .load(function () {
-                    /**
-                     *   PIXI.extras.TiledMap() is an extended PIXI.Container()
-                     *   so you can render it right away
-                     */
-                    var tileMap = new PIXI.extras.TiledMap('resources/level1.tmx');
-                    renderer.render(tileMap);
-                }
-            );
         }
     </script>
 
