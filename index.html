@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Parallax Scrolling Demo</title>
+    <style>
+        body { background-color: #000000; }
+        canvas { background-color: #222222; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
+    <script src="Far.js"></script>
+    <script src="Mid.js"></script>
+    <script src="Scroller.js"></script>
+  </head>
+  <body onload="init();">
+    <div align="center">
+      <canvas id="game-canvas" width="512" height="384"></canvas>
+    </div>
+
+    <script>
+        function init() {
+            stage = new PIXI.Container();
+            renderer = PIXI.autoDetectRenderer(
+                640,
+                480,
+                {view:document.getElementById("game-canvas")}
+            );
+
+            scroller = new Scroller(stage);
+
+            requestAnimationFrame(update);
+        
+        }
+
+        function update() {
+            scroller.update();
+
+            renderer.render(stage);
+
+            requestAnimationFrame(update);
+        }
+
+    </script>
+
+  </body>
+  </html>
