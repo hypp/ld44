@@ -50,11 +50,13 @@ game.ComputerEntity = me.Sprite.extend({
         // call the constructor
         this._super(me.Sprite, 'init', [x, y , settings]);
 
+        var car = 4+(~~(Math.random() * 2)) * 4;
+
         // define a basic walking animation (using all frames)
-        this.addAnimation("walk",  [4, 5, 6, 7]);
+        this.addAnimation("walk",  [car+0, car+1, car+2, car+3]);
 
         // define a standing animation (using the first frame)
-        this.addAnimation("stand",  [4]);
+        this.addAnimation("stand",  [car+0]);
 
         // set the standing animation as default
         this.setCurrentAnimation("stand");
