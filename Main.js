@@ -96,7 +96,7 @@ function Main() {
 
 Main.SCROLL_SPEED = 5;
 Main.ROTATION_SPEED = 3;
-Main.FORWARD_SPEED = 3;
+Main.FORWARD_SPEED = 2.1;
 Main.LEVEL_WIDTH = 20;
 Main.LEVEL_HEIGHT = 15;
 Main.LEVEL_TILE_WIDTH = 32;
@@ -136,15 +136,37 @@ Main.prototype.gameLoop = function(delta) {
     newx = this.car.x + this.car.vx;
     newy = this.car.y + this.car.vy;
 
-    tilex = Math.floor(newx / Main.LEVEL_TILE_WIDTH);
-    tiley = Math.floor(newy / Main.LEVEL_TILE_HEIGHT);
-    idx = tiley*Main.LEVEL_WIDTH+tilex;
-    tile = this.level[idx];
-    if (tile >= 0) {
+    current_tile_x = Math.floor(this.car.x / Main.LEVEL_TILE_WIDTH);
+    current_tile_y = Math.floor(this.car.y / Main.LEVEL_TILE_HEIGHT);
+
+    new_tile_x = Math.floor(newx / Main.LEVEL_TILE_WIDTH);
+    new_tile_y = Math.floor(newy / Main.LEVEL_TILE_HEIGHT);
+
+    if (new_tile_x == current_tile_x && new_tile_y == current_tile_y) {
+        // Safe to allow both
         this.car.x = newx;
         this.car.y = newy;
-    }
+    } else if (new_tile_x != current_tile_x && new_tile_y != current_tile_y) {
+        // Both have changed, never allowed, diagonal movement
+        // Edge case
+    } else {
+        if (new_tile_x == current_tile_x) {
+            // Safe to allow x
+            this.car.x = newx;
+        } else if (new_tile_y == current_tile_y) {
+            // Safe to allow y
+            this.car.y = newy;
+        } 
 
+        // We must still check!
+        idx = new_tile_y*Main.LEVEL_WIDTH+new_tile_x;
+        tile = this.level[idx];
+        if (tile >= 0) {
+            this.car.x = newx;
+            this.car.y = newy;
+        }    
+    }
+    
 
     this.update();
 }
