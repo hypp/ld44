@@ -167,9 +167,8 @@
          "name":"cars",
          "objects":[
                 {
-                 "gid":9,
                  "height":32,
-                 "id":3,
+                 "id":16,
                  "name":"mainPlayer",
                  "properties":
                     {
@@ -188,55 +187,7 @@
                  "visible":true,
                  "width":16,
                  "x":136,
-                 "y":258
-                }, 
-                {
-                 "gid":13,
-                 "height":32,
-                 "id":7,
-                 "name":"computer1",
-                 "properties":
-                    {
-                     "frameheight":32,
-                     "framewidth":16,
-                     "image":"cars"
-                    },
-                 "propertytypes":
-                    {
-                     "frameheight":"int",
-                     "framewidth":"int",
-                     "image":"string"
-                    },
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":136,
-                 "y":292
-                }, 
-                {
-                 "gid":17,
-                 "height":32,
-                 "id":8,
-                 "name":"computer2",
-                 "properties":
-                    {
-                     "frameheight":32,
-                     "framewidth":16,
-                     "image":"cars"
-                    },
-                 "propertytypes":
-                    {
-                     "frameheight":"int",
-                     "framewidth":"int",
-                     "image":"string"
-                    },
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":16,
-                 "x":136,
-                 "y":336
+                 "y":200
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -244,7 +195,7 @@
          "x":0,
          "y":0
         }],
- "nextobjectid":16,
+ "nextobjectid":17,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.1.5",
