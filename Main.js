@@ -70,9 +70,6 @@ function keyboard(value) {
 
 function Main() {
 
-    //Aliases
-    let resources = PIXI.loader.resources;
-
     //Create a Pixi Application
     let app = new PIXI.Application({ 
         width: 640, 
@@ -98,7 +95,12 @@ function Main() {
 }
 
 Main.SCROLL_SPEED = 5;
-Main.ROTATION_SPEED = 1;
+Main.ROTATION_SPEED = 3;
+Main.FORWARD_SPEED = 3;
+Main.LEVEL_WIDTH = 20;
+Main.LEVEL_HEIGHT = 15;
+Main.LEVEL_TILE_WIDTH = 32;
+Main.LEVEL_TILE_HEIGHT = 32;
 
 Main.prototype.update = function() {
     this.scroller.moveViewportXBy(Main.SCROLL_SPEED);
@@ -118,13 +120,38 @@ Main.prototype.gameLoop = function(delta) {
 
     this.car.rotation = this.car.angle * Math.PI / 180.0;
 
+    if (this.up.isDown) {
+        this.car.vx = Math.cos(this.car.rotation - Math.PI/2) * Main.FORWARD_SPEED;
+        this.car.vy = Math.sin(this.car.rotation - Math.PI/2) * Main.FORWARD_SPEED;
+    } else {
+        this.car.vx *= 0.9;
+        this.car.vy *= 0.9;
+
+        if (this.car.vx < 0.01 || this.car.vy < 0.01) {
+            this.car.vx = 0.0;
+            this.car.vy = 0.0;
+        } 
+    }
+
+    newx = this.car.x + this.car.vx;
+    newy = this.car.y + this.car.vy;
+
+    tilex = Math.floor(newx / Main.LEVEL_TILE_WIDTH);
+    tiley = Math.floor(newy / Main.LEVEL_TILE_HEIGHT);
+    idx = tiley*Main.LEVEL_WIDTH+tilex;
+    tile = this.level[idx];
+    if (tile >= 0) {
+        this.car.x = newx;
+        this.car.y = newy;
+    }
+
 
     this.update();
 }
 
 Main.prototype.setup = function() {
     // 20x15
-    level = [
+    this.level = [
         -1,-1,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1,-1,-1,-1,
         -1,-1,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1,-1,-1,-1, -1,-1,-1,-1,-1,
         -1,-1,-1,-1,-1, -1, 2, 1, 1, 1,  1, 3,-1,-1,-1,  2, 1, 3,-1,-1,
@@ -146,12 +173,12 @@ Main.prototype.setup = function() {
 
     roadList = tilesFromImage("resources/roadtiles.png", 32, 32);
 
-    for (let i = 0; i < 15; i++) {
-        let y = i * 32;
-        for (let j = 0; j < 20; j++) {
-            let x = j*32;
-            let idx = i*20+j;
-            let tile = level[idx];
+    for (let i = 0; i < Main.LEVEL_HEIGHT; i++) {
+        let y = i * Main.LEVEL_TILE_HEIGHT;
+        for (let j = 0; j < Main.LEVEL_WIDTH; j++) {
+            let x = j*Main.LEVEL_TILE_WIDTH;
+            let idx = i*Main.LEVEL_WIDTH+j;
+            let tile = this.level[idx];
             if (tile >= 0) {
                 let roadTexture = roadList[tile];
 
@@ -175,6 +202,8 @@ Main.prototype.setup = function() {
 
     this.car.x = 32*6+16;
     this.car.y = 32*5;
+    this.car.vx = 0;
+    this.car.vy = 0;
     this.car.anchor.set(0.5, 0.5);
     this.car.angle = 0.0;
 
