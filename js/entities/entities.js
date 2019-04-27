@@ -1,3 +1,10 @@
+
+function degrees_to_radians(degrees)
+{
+  var pi = Math.PI;
+  return degrees * (pi/180);
+}
+
 /**
  * Player Entity
  */
@@ -13,6 +20,8 @@ game.PlayerEntity = me.Sprite.extend({
         // set the display to follow our position on both axis
         me.game.viewport.follow(this.pos, me.game.viewport.AXIS.BOTH, 0.4);
 
+        this.mo_angle = 0;
+
         // define a basic walking animation (using all frames)
         this.addAnimation("walk",  [0, 1, 2, 3]);
 
@@ -25,8 +34,18 @@ game.PlayerEntity = me.Sprite.extend({
 
     /**
      * update the entity
+     * dt is milliseconds
      */
     update : function (dt) {
+
+        var angles_per_second = 1;
+
+        if (me.input.isKeyPressed("right")) {
+            this.mo_angle += angles_per_second * dt / 1000;
+        }
+
+        radians = degrees_to_radians(this.mo_angle)
+        this.rotate(radians);
 
         // handle collisions against other shapes
         me.collision.check(this);
