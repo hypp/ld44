@@ -41,6 +41,21 @@ function Main() {
         
         //Add the cat to the stage
         app.stage.addChild(cat);
+
+
+        //Create the `tileset` sprite from the texture
+        let baseTexture = PIXI.BaseTexture.fromImage("resources/roadtiles.png");
+        let rectangle = new PIXI.Rectangle(0, 0, 32, 32);
+        let texture = new PIXI.Texture(baseTexture, rectangle);
+
+        //Create the sprite from the texture
+        let road = new Sprite(texture);
+
+        //Position the rocket sprite on the canvas
+        road.x = 132;
+        road.y = 132;
+
+        app.stage.addChild(road)
     }
 
     this.scroller = new Scroller(this.stage);
