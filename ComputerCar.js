@@ -109,7 +109,7 @@ ComputerCar.prototype.init = function(level, target) {
 }
 
 ComputerCar.prototype.update = function() {
-    this.speed += 1.15;
+    this.speed += Main.ACCELERATION;
     if (this.speed > this.max_forward_speed) {
         this.speed = this.max_forward_speed;
     }

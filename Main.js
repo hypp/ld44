@@ -105,8 +105,9 @@ Main.ROTATION_SPEED = 3.6;
 Main.MAX_FORWARD_SPEED = 2.1;
 Main.LEVEL_WIDTH = 20;
 Main.LEVEL_HEIGHT = 15;
-Main.LEVEL_TILE_WIDTH = 40;
-Main.LEVEL_TILE_HEIGHT = 40;
+Main.LEVEL_TILE_WIDTH = 48;
+Main.LEVEL_TILE_HEIGHT = 48;
+Main.ACCELERATION = 0.3;
 
 Main.STATE_WAIT = 0;
 Main.STATE_LAPS = 1;
@@ -136,22 +137,16 @@ Main.prototype.gameLoop = function(delta) {
     if (this.up.isDown) {
         this.car.play()
 
+        this.car.speed += Main.ACCELERATION;
         if (this.car.speed > this.car.max_forward_speed) {
-            // If we gained speed from some other means
-            // typically collision
-            this.car.speed -= 0.1;
-        } else {
-            this.car.speed += 1.15;
-            if (this.car.speed > this.car.max_forward_speed) {
-                this.car.speed = this.car.max_forward_speed;
-            }
+            this.car.speed = this.car.max_forward_speed;
         }
 
         if (this.left.isDown) {
-            this.car.angle = mod(this.car.angle - this.car.rotation_speed / delta, 360);
+            this.car.angle = mod(this.car.angle - this.car.rotation_speed, 360);
         }
         if (this.right.isDown) {
-            this.car.angle = mod(this.car.angle + this.car.rotation_speed / delta, 360);
+            this.car.angle = mod(this.car.angle + this.car.rotation_speed, 360);
         }
     
     } else {
@@ -173,8 +168,10 @@ Main.prototype.gameLoop = function(delta) {
     });
 
     // brute force collision detection
-    let radius = 8;
+    let radius = 9;
     let radiusSquared = radius*radius;
+    let shieldSquared = (radius+2)*(radius+2);
+    let expectedDistance = radius+radius;
 
     for (let i = 0; i < this.computerCars.length; i++) {
         let carA = this.computerCars[i];
@@ -186,9 +183,9 @@ Main.prototype.gameLoop = function(delta) {
             let dy = carA.y - carB.y;
 
             let distanceSquared = dx*dx + dy*dy;
-            if (distanceSquared < (radiusSquared + radiusSquared)) {
-                // We have a collision
 
+            if (distanceSquared < (shieldSquared + shieldSquared)) {
+                // We have a collision
                 if (carB.bounding_circle == null) {    
                     var graphics = new PIXI.Graphics();
                     graphics.lineStyle(1, 0xffffff, 1);
@@ -204,7 +201,11 @@ Main.prototype.gameLoop = function(delta) {
                     this.stage.addChild(graphics);
                     carA.bounding_circle = graphics;
                 }
+            }
 
+            if (distanceSquared < (radiusSquared + radiusSquared)) {
+                // We have a collision
+    
                 // TODO Add a particle effect here
                 // Assume bounding circles have same size
                 // Then we only have to dvide by 2
@@ -212,19 +213,21 @@ Main.prototype.gameLoop = function(delta) {
                 var cpY = (carA.y + carB.y) / 2;
 
                 var distance = Math.sqrt(distanceSquared);
-                var ratio = distance / (radiusSquared);
+                var delta_distance = (expectedDistance - distance);
+                var ratio =  delta_distance / expectedDistance;
+                ratio = 1;
 
                 // Move them apart
-                carA.x -= distance * ratio * 0.5;
-                carA.y -= distance * ratio * 0.5;
+                newx = carA.x - distance * ratio * 0.5;
+                newy = carA.y - distance * ratio * 0.5;
+                carA.setPos(newx, newy);
 
-                carB.x += distance * ratio * 0.5;
-                carB.y += distance * ratio * 0.5;
-   
-//                let tmp = carB.speed;
-//                carB.speed = carA.speed;
-//                carA.speed = tmp;
-
+                newx = carB.x + distance * ratio * 0.5;
+                newy = carB.y + distance * ratio * 0.5;
+                carB.setPos(newx, newy);
+                
+                carB.speed *= 0.5;
+                carA.speed *= 0.5;
             }
         }    
     }
@@ -286,18 +289,18 @@ Main.prototype.setup = function() {
     this.car.y = Main.LEVEL_TILE_HEIGHT*4;
     this.car.init(this.level);
     this.car.max_forward_speed = Main.MAX_FORWARD_SPEED * 0.5;
-    this.car.rotation_speed = Main.ROTATION_SPEED * 0.5;
+    this.car.rotation_speed = Main.ROTATION_SPEED * 0.9;
     this.app.stage.addChild(this.car)
     this.computerCars.push(this.car);
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 6; i++) {
         let texture_offset = (i % 2) * 4 + 4
         let computer = new ComputerCar(carList.slice(texture_offset,texture_offset+4)); 
         computer.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
-        computer.y = Main.LEVEL_TILE_HEIGHT*(5+i);
+        computer.y = Main.LEVEL_TILE_HEIGHT*4+(i+1)*32; // car heigh = 32
         computer.init(this.level, 0)
-        computer.max_forward_speed = Main.MAX_FORWARD_SPEED * (Math.random() * 0.1 + 0.9);
-        computer.rotation_speed = Main.ROTATION_SPEED * (Math.random() * 0.1 + 0.9);
+        computer.max_forward_speed = Main.MAX_FORWARD_SPEED * (Math.random() * 0.2 + 0.8);
+        computer.rotation_speed = Main.ROTATION_SPEED * (Math.random() * 0.2 + 0.8);
         this.app.stage.addChild(computer);
         this.computerCars.push(computer);
     }
