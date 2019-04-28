@@ -94,17 +94,24 @@ function Main() {
 
     this.app = app;
 
-    this.introScene = new PIXI.Container();
+    this.scenes = [];
+
+    this.introScene = new IntroScene(this);
     this.introScene.visible = false;
+    this.scenes.push(this.introScene);
     this.app.stage.addChild(this.introScene);
+
     this.gameScene = new GameScene(this);
     this.gameScene.visible = true;
+    this.scenes.push(this.gameScene);
     this.app.stage.addChild(this.gameScene);
+    
     this.endScene = new PIXI.Container();
     this.endScene.visible = false;
+    this.scenes.push(this.endScene);
     this.app.stage.addChild(this.endScene);
 
-    this.sceneState = SceneManager.STATE_GAME;
+    this.sceneState = SceneManager.STATE_INTRO;
 
     this.state = Main.STATE_WAIT;
     this.isShooting = true; // Avoid firing first bullet
@@ -140,24 +147,32 @@ SceneManager = {};
 
 SceneManager.STATE_INTRO = 0;
 SceneManager.STATE_GAME = 1;
-SceneManager.STATE_END = 0;
+SceneManager.STATE_END = 2;
+SceneManager.NUM_STATES = 3; // Remeber to increase this if you add more scenes
 
 Main.prototype.gameLoop = function(delta) {
 
+    // TODO refactor this to index into the scenes array using the state values
     if (this.sceneState == SceneManager.STATE_INTRO) {
+        this.scenes.forEach(element => {
+            element.visible = false;
+        });
         this.introScene.visible = true;
-        this.gameScene.visible = false;
-        this.endScene.visible = false;
+
+        this.introScene.gameLoop(delta);
+
     } else if (this.sceneState == SceneManager.STATE_GAME) {
-        this.introScene.visible = false;
+        this.scenes.forEach(element => {
+            element.visible = false;
+        });
         this.gameScene.visible = true;
-        this.endScene.visible = false;
 
         this.gameScene.gameLoop(delta);
 
     } else if (this.sceneState == SceneManager.STATE_END) {
-        this.introScene.visible = false;
-        this.gameScene.visible = false;
+        this.scenes.forEach(element => {
+            element.visible = false;
+        });
         this.endScene.visible = true;
     }
 
@@ -166,7 +181,13 @@ Main.prototype.gameLoop = function(delta) {
 
 Main.prototype.setup = function() {
 
+    this.introScene.init();
     this.gameScene.init();
+    this.introScene.init();
 
     this.app.ticker.add(this.gameLoop.bind(this));
+}
+
+Main.prototype.next = function() {
+    this.sceneState = (this.sceneState + 1) % SceneManager.NUM_STATES;
 }
