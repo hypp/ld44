@@ -179,6 +179,7 @@ Main.prototype.gameLoop = function(delta) {
     }
     
     this.computer1.update();
+    this.computer2.update();
 
 
     this.update();
