@@ -7,6 +7,8 @@ function PlayerCar(textures) {
     this.vy = 0;
     this.anchor.set(0.5, 0.5);
     this.angle = 0.0;
+
+    this.health = 100;
 }
 
 PlayerCar.prototype = Object.create(PIXI.extras.AnimatedSprite.prototype);

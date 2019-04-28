@@ -96,6 +96,8 @@ function ComputerCar(textures) {
     this.anchor.set(0.5, 0.5);
     this.angle = 0.0;
 
+    this.health = 3;
+
     this.stop();
 }
 

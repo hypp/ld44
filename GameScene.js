@@ -106,9 +106,7 @@ GameScene.prototype.init = function() {
         fill: "#ff9300"
     });
 
-    this.health = 100;
-
-    this.hud = new PIXI.Text("Health: " + this.health, style);   
+    this.hud = new PIXI.Text("Health: " + this.car.health, style);   
     this.addChild(this.hud);
 
 }
@@ -175,7 +173,7 @@ GameScene.prototype.doGameState = function(delta) {
             this.isShooting = true;
 
             this.shoot();
-            this.health -= 1;
+            this.car.health -= 1;
         }
     } else {
         if (this.space.isUp) {
@@ -221,12 +219,15 @@ GameScene.prototype.doGameState = function(delta) {
             if (distanceSquared < (bulletRadiusSquared + radiusSquared)) {
                 hit = true;
 
-                // remove car
-                this.computerCars.splice(i,1);
-                this.removeChild(car);
+                car.health -= 1;
+                if (car.health <= 0) {
+                    // remove car
+                    this.computerCars.splice(i,1);
+                    this.removeChild(car);
 
-                // TODO add explosion
+                    // TODO add explosion
 
+                }
                 break;
             }
         }
@@ -251,6 +252,8 @@ GameScene.prototype.doGameState = function(delta) {
             let distanceSquared = dx*dx + dy*dy;
 
             if (distanceSquared < (shieldSquared + shieldSquared)) {
+
+                /*
                 if (carB.bounding_circle == null) {    
                     var graphics = new PIXI.Graphics();
                     graphics.lineStyle(1, 0xffffff, 1);
@@ -266,13 +269,14 @@ GameScene.prototype.doGameState = function(delta) {
                     this.addChild(graphics);
                     carA.bounding_circle = graphics;
                 }
+                */
             }
 
             if (distanceSquared < (radiusSquared + radiusSquared)) {
                 // We have a collision
 
                 if (this.car == carA || this.car == carB) {
-                    this.health -= 2;
+                    this.car.health -= 2;
                 }
     
                 // TODO Add a particle effect here
@@ -315,12 +319,12 @@ GameScene.prototype.doGameState = function(delta) {
         }
     }
 
-    if (this.health < 0) {
-        this.health = 0;
+    if (this.car.health < 0) {
+        this.car.health = 0;
     }
 
     // Check end game conditions
-    if (this.health == 0) {
+    if (this.car.health == 0) {
         // Player has no health
         this.state = GameScene.STATE_PLAYER_DIED;
     }
@@ -330,7 +334,7 @@ GameScene.prototype.doGameState = function(delta) {
         this.state = GameScene.STATE_PLAYER_WIN;
     }
 
-    this.hud.text = "Health: " + this.health;
+    this.hud.text = "Health: " + this.car.health;
 }
 
 
