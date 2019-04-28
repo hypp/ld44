@@ -211,22 +211,6 @@ Main.prototype.gameLoop = function(delta) {
                 // Then we only have to dvide by 2
                 var cpX = (carA.x + carB.x) / 2;
                 var cpY = (carA.y + carB.y) / 2;
-
-                /*
-                var distance = Math.sqrt(distanceSquared);
-                var nx = (carB.x - carA.x) / distance;
-                var ny = (carB.y - carA.y) / distance;
-
-                var p = 2*(carA.vx * nx + carA.vy * ny - carB.vx * nx - carB.vy*ny) / 2;
-                newx = carA.x + carA.vx - p * nx;
-                newy = carA.y + carA.vy - p * ny;
-                carA.setPos(newx, newy);
-
-                newx = carB.x + carB.vx + p * nx;
-                newy = carB.y + carB.vy + p * ny;
-                carB.setPos(newx, newy);
-                */
-
                 
 
                 var distance = Math.sqrt(distanceSquared);
@@ -244,8 +228,9 @@ Main.prototype.gameLoop = function(delta) {
                 newy = carB.y - translateY;
                 carB.setPos(newx, newy);
 
-                carB.speed *= 0.1;
-                carA.speed *= 0.1;
+                var tmp = carB.speed;
+                carB.speed = carA.speed;
+                carA.speed = tmp;
             }
         }    
     }
@@ -317,8 +302,8 @@ Main.prototype.setup = function() {
         computer.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
         computer.y = Main.LEVEL_TILE_HEIGHT*4+(i+1)*32; // car heigh = 32
         computer.init(this.level, 0)
-        computer.max_forward_speed = Main.MAX_FORWARD_SPEED * (Math.random() * 0.2 + 0.8);
-        computer.rotation_speed = Main.ROTATION_SPEED * (Math.random() * 0.2 + 0.8);
+        computer.max_forward_speed = Main.MAX_FORWARD_SPEED * (Math.random() * 0.3 + 0.7);
+        computer.rotation_speed = Main.ROTATION_SPEED * (Math.random() * 0.3 + 0.7);
         this.app.stage.addChild(computer);
         this.computerCars.push(computer);
     }
