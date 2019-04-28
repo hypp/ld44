@@ -120,7 +120,7 @@ Main.STATE_DONE = 2;
 
 Main.prototype.shoot = function() {
 
-    var bullet = new PIXI.Sprite.from("resources/bullet.png");
+    var bullet = new Bullet("resources/bullet.png", this.level, this.app);
     bullet.x = this.car.x;
     bullet.y = this.car.y;
     bullet.anchor.set(0.5,0.5);
@@ -301,14 +301,12 @@ Main.prototype.gameLoop = function(delta) {
 
     // Loop backwards so we can delete old entries
     for(var b = this.bullets.length-1;b>=0;b--){
-        // Compensate for texture being rotated
-        this.bullets[b].x += Math.cos(this.bullets[b].rotation - Math.PI/2) * this.bullets[b].speed;
-        this.bullets[b].y += Math.sin(this.bullets[b].rotation - Math.PI/2) * this.bullets[b].speed;
+        let bullet = this.bullets[b];
+        bullet.my_update();
 
-        if (this.bullets[b].position.x > this.app.width || this.bullets[b].position.x < 0 ||
-            this.bullets[b].position.y > this.app.height || this.bullets[b].position.y < 0) {
-                this.stage.removeChild(this.bullets[b]);
-                this.bullets.splice(b, 1);
+        if (!bullet.isAlive) {
+            this.stage.removeChild(bullet);
+            this.bullets.splice(b, 1);
         }
     }
 
