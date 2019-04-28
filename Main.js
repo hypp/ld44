@@ -136,7 +136,7 @@ function Main() {
     // Load some music
     PIXI.sound.Sound.from({
         url: 'resources/ld44.mp3',
-        autoPlay: false,
+        autoPlay: true,
         loop: true,
         complete: function() {
             console.log('Sound finished');
