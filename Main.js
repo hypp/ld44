@@ -88,7 +88,7 @@ function Main() {
     this.app = app
     this.stage = this.app.stage
     this.state = Main.STATE_WAIT;
-    this.isShooting = false;
+    this.isShooting = true; // Avoid firing first bullet
     this.bullets = [];
 
     //Add the canvas that Pixi automatically created for you to the HTML document
@@ -111,7 +111,7 @@ Main.LEVEL_HEIGHT = 15;
 Main.LEVEL_TILE_WIDTH = 48;
 Main.LEVEL_TILE_HEIGHT = 48;
 Main.ACCELERATION = 0.1;
-Main.BULLET_SPEED = Main.MAX_FORWARD_SPEED + 0.5;
+Main.BULLET_SPEED = Main.MAX_FORWARD_SPEED * 1.5;
 
 Main.STATE_WAIT = 0;
 Main.STATE_LAPS = 1;
@@ -121,18 +121,14 @@ Main.STATE_DONE = 2;
 Main.prototype.shoot = function() {
 
     var bullet = new PIXI.Sprite.from("resources/bullet.png");
-    bullet.position.x = this.car.x;
-    bullet.position.y = this.car.y;
+    bullet.x = this.car.x;
+    bullet.y = this.car.y;
     bullet.anchor.set(0.5,0.5);
     bullet.rotation = this.car.rotation;
+    bullet.speed = this.car.speed*1.5;
     this.stage.addChild(bullet);
     this.bullets.push(bullet);
 }
-
-Main.prototype.update = function() {
-    //this.scroller.moveViewportXBy(Main.SCROLL_SPEED);
-    this.app.renderer.render(this.stage);
-};
 
 Main.prototype.gameLoop = function(delta) {
 
@@ -186,7 +182,7 @@ Main.prototype.gameLoop = function(delta) {
     }
 
     this.computerCars.forEach(element => {
-        element.update();
+        element.my_update();
         if (element.bounding_circle == null) {
         } else {
             this.stage.removeChild(element.bounding_circle);
@@ -306,8 +302,8 @@ Main.prototype.gameLoop = function(delta) {
     // Loop backwards so we can delete old entries
     for(var b = this.bullets.length-1;b>=0;b--){
         // Compensate for texture being rotated
-        this.bullets[b].position.x += Math.cos(this.bullets[b].rotation - Math.PI/2)*Main.BULLET_SPEED;
-        this.bullets[b].position.y += Math.sin(this.bullets[b].rotation - Math.PI/2)*Main.BULLET_SPEED;
+        this.bullets[b].x += Math.cos(this.bullets[b].rotation - Math.PI/2) * this.bullets[b].speed;
+        this.bullets[b].y += Math.sin(this.bullets[b].rotation - Math.PI/2) * this.bullets[b].speed;
 
         if (this.bullets[b].position.x > this.app.width || this.bullets[b].position.x < 0 ||
             this.bullets[b].position.y > this.app.height || this.bullets[b].position.y < 0) {
@@ -316,7 +312,7 @@ Main.prototype.gameLoop = function(delta) {
         }
     }
 
-    this.update();
+    this.app.renderer.render(this.stage);
 }
 
 Main.prototype.setup = function() {
@@ -372,7 +368,7 @@ Main.prototype.setup = function() {
     this.car.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
     this.car.y = Main.LEVEL_TILE_HEIGHT*4;
     this.car.init(this.level);
-    this.car.max_forward_speed = Main.MAX_FORWARD_SPEED * 0.5;
+    this.car.max_forward_speed = Main.MAX_FORWARD_SPEED;
     this.car.rotation_speed = Main.ROTATION_SPEED * 0.9;
     this.app.stage.addChild(this.car)
     this.computerCars.push(this.car);

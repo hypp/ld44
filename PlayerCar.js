@@ -18,7 +18,7 @@ PlayerCar.prototype.init = function(level) {
 
 }
 
-PlayerCar.prototype.update = function() {
+PlayerCar.prototype.my_update = function() {
     this.rotation = this.angle * Math.PI / 180.0;
 
     // compensate for tile being in the wrong direction
@@ -32,7 +32,7 @@ PlayerCar.prototype.update = function() {
 
 }
 
-// Set x or y, if the do not move into forbidden tile
+// Set x or y, if we do not move into forbidden tile
 PlayerCar.prototype.setPos = function(newx, newy) {
     current_tile_x = Math.floor(this.x / Main.LEVEL_TILE_WIDTH);
     current_tile_y = Math.floor(this.y / Main.LEVEL_TILE_HEIGHT);

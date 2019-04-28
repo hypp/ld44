@@ -110,7 +110,7 @@ ComputerCar.prototype.init = function(level, target) {
     this.path = buildPath(this.x, this.y, this.level);
 }
 
-ComputerCar.prototype.update = function() {
+ComputerCar.prototype.my_update = function() {
 
     if (this.speed > 0) {
         this.play();
