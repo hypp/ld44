@@ -249,7 +249,7 @@ Main.prototype.setup = function() {
         computer.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
         computer.y = Main.LEVEL_TILE_HEIGHT*(5+i);
         computer.init(this.level, 0)
-        computer.max_forward_speed = Main.MAX_FORWARD_SPEED;
+        computer.max_forward_speed = Main.MAX_FORWARD_SPEED * (Math.random() * 0.1 + 0.9);
         this.app.stage.addChild(computer);
         this.computerCars.push(computer);
     }
