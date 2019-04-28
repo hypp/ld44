@@ -88,6 +88,8 @@ function Main() {
     this.app = app
     this.stage = this.app.stage
     this.state = Main.STATE_WAIT;
+    this.isShooting = false;
+    this.bullets = [];
 
     //Add the canvas that Pixi automatically created for you to the HTML document
     document.body.appendChild(app.view);
@@ -96,6 +98,7 @@ function Main() {
     PIXI.loader
     .add("resources/roadtiles.png")
     .add("resources/cars.png")
+    .add("resources/bullet.png")
     .load(this.setup.bind(this));
 
 }
@@ -108,11 +111,23 @@ Main.LEVEL_HEIGHT = 15;
 Main.LEVEL_TILE_WIDTH = 48;
 Main.LEVEL_TILE_HEIGHT = 48;
 Main.ACCELERATION = 0.1;
+Main.BULLET_SPEED = Main.MAX_FORWARD_SPEED + 0.5;
 
 Main.STATE_WAIT = 0;
 Main.STATE_LAPS = 1;
 Main.STATE_DONE = 2;
 
+
+Main.prototype.shoot = function() {
+
+    var bullet = new PIXI.Sprite.from("resources/bullet.png");
+    bullet.position.x = this.car.x;
+    bullet.position.y = this.car.y;
+    bullet.anchor.set(0.5,0.5);
+    bullet.rotation = this.car.rotation;
+    this.stage.addChild(bullet);
+    this.bullets.push(bullet);
+}
 
 Main.prototype.update = function() {
     //this.scroller.moveViewportXBy(Main.SCROLL_SPEED);
@@ -155,6 +170,18 @@ Main.prototype.gameLoop = function(delta) {
         this.car.speed -= 0.1;
         if (this.car.speed < 0.01) {
             this.car.speed = 0;
+        }
+    }
+
+    if (this.isShooting == false) {
+        if (this.space.isDown) {
+            this.isShooting = true;
+
+            this.shoot();
+        }
+    } else {
+        if (this.space.isUp) {
+            this.isShooting = false;
         }
     }
 
@@ -233,6 +260,19 @@ Main.prototype.gameLoop = function(delta) {
                 carA.speed = tmp;
             }
         }    
+    }
+
+    // Loop backwards so we can delete old entries
+    for(var b = this.bullets.length-1;b>=0;b--){
+        // Compensate for texture being rotated
+        this.bullets[b].position.x += Math.cos(this.bullets[b].rotation - Math.PI/2)*Main.BULLET_SPEED;
+        this.bullets[b].position.y += Math.sin(this.bullets[b].rotation - Math.PI/2)*Main.BULLET_SPEED;
+
+        if (this.bullets[b].position.x > this.app.width || this.bullets[b].position.x < 0 ||
+            this.bullets[b].position.y > this.app.height || this.bullets[b].position.y < 0) {
+                this.stage.removeChild(this.bullets[b]);
+                this.bullets.splice(b, 1);
+        }
     }
 
     this.update();
