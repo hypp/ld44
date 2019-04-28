@@ -14,7 +14,7 @@ function GameScene(sceneManager) {
     this.isShooting = true; // Avoid firing first bullet
     this.bullets = [];
 
-    this.end_delay = 60*10; // About 10 seconds
+    this.end_delay = 60*2.5; // About X seconds
 
 }
 
@@ -131,13 +131,13 @@ GameScene.prototype.gameLoop = function(delta) {
     if (this.state == GameScene.STATE_PLAYER_DIED) {
         this.end_delay--;
         if (this.end_delay == 0) {
-            this.sceneManager.next();
+            this.sceneManager.fail();
         }
     }
     if (this.state == GameScene.STATE_PLAYER_WIN) {
         this.end_delay--;
         if (this.end_delay == 0) {
-            this.sceneManager.next();
+            this.sceneManager.win();
         }
     }
 }

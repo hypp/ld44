@@ -96,6 +96,7 @@ function Main() {
 
     this.scenes = [];
 
+    // NOTE!!! Order must match STATE_ constants
     this.introScene = new IntroScene(this);
     this.introScene.visible = false;
     this.scenes.push(this.introScene);
@@ -106,10 +107,15 @@ function Main() {
     this.scenes.push(this.gameScene);
     this.app.stage.addChild(this.gameScene);
     
-    this.endScene = new PIXI.Container();
+    this.endScene = new EndScene(this);
     this.endScene.visible = false;
     this.scenes.push(this.endScene);
     this.app.stage.addChild(this.endScene);
+
+    this.dieScene = new DieScene(this);
+    this.dieScene.visible = false;
+    this.scenes.push(this.dieScene);
+    this.app.stage.addChild(this.dieScene);
 
     this.sceneState = SceneManager.STATE_INTRO;
 
@@ -148,46 +154,38 @@ SceneManager = {};
 SceneManager.STATE_INTRO = 0;
 SceneManager.STATE_GAME = 1;
 SceneManager.STATE_END = 2;
-SceneManager.NUM_STATES = 3; // Remeber to increase this if you add more scenes
+SceneManager.STATE_DIE = 3;
+SceneManager.NUM_STATES = 4; // Remeber to increase this if you add more scenes
 
 Main.prototype.gameLoop = function(delta) {
 
-    // TODO refactor this to index into the scenes array using the state values
-    if (this.sceneState == SceneManager.STATE_INTRO) {
-        this.scenes.forEach(element => {
-            element.visible = false;
-        });
-        this.introScene.visible = true;
-
-        this.introScene.gameLoop(delta);
-
-    } else if (this.sceneState == SceneManager.STATE_GAME) {
-        this.scenes.forEach(element => {
-            element.visible = false;
-        });
-        this.gameScene.visible = true;
-
-        this.gameScene.gameLoop(delta);
-
-    } else if (this.sceneState == SceneManager.STATE_END) {
-        this.scenes.forEach(element => {
-            element.visible = false;
-        });
-        this.endScene.visible = true;
-    }
+    this.scenes.forEach(element => {
+        element.visible = false;
+    });
+    let currentState = this.scenes[this.sceneState];
+    currentState.visible = true;
+    currentState.gameLoop(delta);
 
     this.app.renderer.render(this.app.stage);
 }
 
 Main.prototype.setup = function() {
 
-    this.introScene.init();
-    this.gameScene.init();
-    this.introScene.init();
+    this.scenes.forEach(element => {
+        element.init();
+    });
 
     this.app.ticker.add(this.gameLoop.bind(this));
 }
 
 Main.prototype.next = function() {
     this.sceneState = (this.sceneState + 1) % SceneManager.NUM_STATES;
+}
+
+Main.prototype.fail = function() {
+    this.sceneState = SceneManager.STATE_DIE;
+}
+
+Main.prototype.win = function() {
+    this.sceneState = SceneManager.STATE_END;
 }
