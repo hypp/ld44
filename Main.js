@@ -107,7 +107,7 @@ Main.LEVEL_WIDTH = 20;
 Main.LEVEL_HEIGHT = 15;
 Main.LEVEL_TILE_WIDTH = 48;
 Main.LEVEL_TILE_HEIGHT = 48;
-Main.ACCELERATION = 0.3;
+Main.ACCELERATION = 0.1;
 
 Main.STATE_WAIT = 0;
 Main.STATE_LAPS = 1;
@@ -212,22 +212,40 @@ Main.prototype.gameLoop = function(delta) {
                 var cpX = (carA.x + carB.x) / 2;
                 var cpY = (carA.y + carB.y) / 2;
 
+                /*
                 var distance = Math.sqrt(distanceSquared);
-                var delta_distance = (expectedDistance - distance);
-                var ratio =  delta_distance / expectedDistance;
-                ratio = 1;
+                var nx = (carB.x - carA.x) / distance;
+                var ny = (carB.y - carA.y) / distance;
 
-                // Move them apart
-                newx = carA.x - distance * ratio * 0.5;
-                newy = carA.y - distance * ratio * 0.5;
+                var p = 2*(carA.vx * nx + carA.vy * ny - carB.vx * nx - carB.vy*ny) / 2;
+                newx = carA.x + carA.vx - p * nx;
+                newy = carA.y + carA.vy - p * ny;
                 carA.setPos(newx, newy);
 
-                newx = carB.x + distance * ratio * 0.5;
-                newy = carB.y + distance * ratio * 0.5;
+                newx = carB.x + carB.vx + p * nx;
+                newy = carB.y + carB.vy + p * ny;
                 carB.setPos(newx, newy);
+                */
+
                 
-                carB.speed *= 0.5;
-                carA.speed *= 0.5;
+
+                var distance = Math.sqrt(distanceSquared);
+                var ratio = (expectedDistance - distance) / distance;
+
+                var translateX = dx * 0.5 * ratio;
+                var translateY = dy * 0.5 * ratio;
+
+                // Move them apart
+                newx = carA.x + translateX;
+                newy = carA.y + translateY;
+                carA.setPos(newx, newy);
+
+                newx = carB.x - translateX;
+                newy = carB.y - translateY;
+                carB.setPos(newx, newy);
+
+                carB.speed *= 0.1;
+                carA.speed *= 0.1;
             }
         }    
     }
