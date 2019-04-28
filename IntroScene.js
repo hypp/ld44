@@ -49,7 +49,8 @@ IntroScene.prototype.init = function() {
         "Shoot too many and you loose your life; your currency.",
         "Shoot too few and you loose the game.",
         "",
-        "Controls: Space to start, Space to shoot, Up for speed, Left/Right to steer."
+        "Controls: Space to start, Space to shoot, Up for speed, Left/Right to steer.",
+        "Click to enable music."
     ];
 
     style = new PIXI.TextStyle({
