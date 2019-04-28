@@ -67,6 +67,86 @@ function keyboard(value) {
     return key;
 }
 
+function tileIdxFromXY(x,y) {
+    let tile_x = Math.floor(x / Main.LEVEL_TILE_WIDTH);
+    let tile_y = Math.floor(y / Main.LEVEL_TILE_HEIGHT);
+    let idx = tile_y*Main.LEVEL_WIDTH+tile_x;
+    return idx;
+}
+
+function xyFromTileIdx(idx) {
+    let x = Math.floor(idx % Main.LEVEL_WIDTH)*Main.LEVEL_TILE_WIDTH + Main.LEVEL_TILE_WIDTH/2;
+    let y = Math.floor(idx / Main.LEVEL_WIDTH)*Main.LEVEL_TILE_HEIGHT + Main.LEVEL_TILE_HEIGHT/2;
+
+    return [x,y];
+}
+
+function checkIdx(idx, previousIdx, level) {
+    if (idx > level.length) {
+        return false;
+    }
+
+    if (idx == previousIdx) {
+        return false;
+    }
+
+    let tile = level[idx];
+    if (tile < 0) {
+        return false;
+    }
+
+    return true;
+}
+
+function buildPath(x, y, level) {
+    let start_idx = tileIdxFromXY(x,y);
+    let xy = xyFromTileIdx(start_idx);
+    let start_x = xy[0];
+    let start_y = xy[1];
+
+    path = [];
+    current_idx = start_idx;
+    previous_idx = -1;
+
+    i = level.length;
+    do {
+        let up_idx = current_idx - Main.LEVEL_WIDTH;
+        let down_idx = current_idx + Main.LEVEL_WIDTH;
+        let left_idx = current_idx - 1;
+        let right_idx = current_idx + 1;
+
+        if (checkIdx(up_idx, previous_idx, level)) {
+                // Up is ok
+                path.push(up_idx);
+                previous_idx = current_idx;
+                current_idx = up_idx
+        } else if (checkIdx(down_idx, previous_idx, level)) {
+            // Up is ok
+            path.push(down_idx);
+            previous_idx = current_idx;
+            current_idx = down_idx
+        } else if (checkIdx(left_idx, previous_idx, level)) {
+            // Up is ok
+            path.push(left_idx);
+            previous_idx = current_idx;
+            current_idx = left_idx
+        } else if (checkIdx(right_idx, previous_idx, level)) {
+            // Up is ok
+            path.push(right_idx);
+            previous_idx = current_idx;
+            current_idx = right_idx
+        } else {
+            console.log("Failed to find a valid path")
+        }
+
+        i -= 1;
+        if (i < 0) {
+            break;
+        }
+    } while (current_idx != start_idx);
+
+    return path;
+}
 
 function Main() {
 
@@ -109,8 +189,9 @@ Main.prototype.update = function() {
 
 Main.prototype.gameLoop = function(delta) {
 
-
     if (this.up.isDown) {
+        this.car.play()
+
         this.car.speed += 1.15;
         if (this.car.speed > Main.MAX_FORWARD_SPEED) {
             this.car.speed = Main.MAX_FORWARD_SPEED;
@@ -124,6 +205,8 @@ Main.prototype.gameLoop = function(delta) {
         }
     
     } else {
+        this.car.stop();
+
         this.car.speed -= 0.1;
         if (this.car.speed < 0.01) {
             this.car.speed = 0;
@@ -169,6 +252,12 @@ Main.prototype.gameLoop = function(delta) {
         }    
     }
     
+    // Move computers car
+    this.computer1.speed += 1.15;
+    if (this.computer1.speed > Main.MAX_FORWARD_SPEED) {
+        this.computer1.speed = Main.MAX_FORWARD_SPEED;
+    }
+
 
     this.update();
 }
@@ -219,20 +308,41 @@ Main.prototype.setup = function() {
 
 
     carList = tilesFromImage("resources/cars.png", 16, 32);
-    let carTexture = carList[0];
 
-    //Create the sprite from the texture
-    this.car = new PIXI.Sprite(carTexture);
-
-    this.car.x = Main.LEVEL_TILE_WIDTH*6+16;
+    this.car = new PIXI.extras.AnimatedSprite(carList.slice(0,4));
+    this.car.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
     this.car.y = Main.LEVEL_TILE_HEIGHT*5;
     this.car.speed = 0;
     this.car.vx = 0;
     this.car.vy = 0;
     this.car.anchor.set(0.5, 0.5);
     this.car.angle = 0.0;
-
     this.app.stage.addChild(this.car)
+
+    this.computer1 = new PIXI.extras.AnimatedSprite(carList.slice(4,8));
+    this.computer1.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
+    this.computer1.y = Main.LEVEL_TILE_HEIGHT*6;
+    this.computer1.speed = 0;
+    this.computer1.vx = 0;
+    this.computer1.vy = 0;
+    this.computer1.anchor.set(0.5, 0.5);
+    this.computer1.angle = 0.0;
+    this.app.stage.addChild(this.computer1)
+
+    this.computer1.path = buildPath(this.computer1.x, this.computer1.y, this.level);
+    this.computer1.target = 2;
+
+    this.computer2 = new PIXI.extras.AnimatedSprite(carList.slice(8,12));
+    this.computer2.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
+    this.computer2.y = Main.LEVEL_TILE_HEIGHT*7;
+    this.computer2.speed = 0;
+    this.computer2.vx = 0;
+    this.computer2.vy = 0;
+    this.computer2.anchor.set(0.5, 0.5);
+    this.computer2.angle = 0.0;
+    this.app.stage.addChild(this.computer2)
+
+    
 
     //this.scroller = new Scroller(this.stage);
 
