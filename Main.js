@@ -282,11 +282,11 @@ Main.prototype.gameLoop = function(delta) {
         delta_angle -= 360;
     }
 
-    if (delta_angle < 0) {
-        this.computer1.angle = mod(this.computer1.angle - 2*Main.ROTATION_SPEED, 360);
+    if (delta_angle < -0.5) {
+        this.computer1.angle = mod(this.computer1.angle - 1.2*Main.ROTATION_SPEED, 360);
     }
-    if (delta_angle > 0) {
-        this.computer1.angle = mod(this.computer1.angle + 2*Main.ROTATION_SPEED, 360);
+    if (delta_angle > 0.5) {
+        this.computer1.angle = mod(this.computer1.angle + 1.2*Main.ROTATION_SPEED, 360);
     }
 
     this.computer1.rotation = this.computer1.angle * Math.PI / 180.0;
