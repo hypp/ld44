@@ -73,87 +73,6 @@ function keyboard(value) {
     return key;
 }
 
-function tileIdxFromXY(x,y) {
-    let tile_x = Math.floor(x / Main.LEVEL_TILE_WIDTH);
-    let tile_y = Math.floor(y / Main.LEVEL_TILE_HEIGHT);
-    let idx = tile_y*Main.LEVEL_WIDTH+tile_x;
-    return idx;
-}
-
-function xyFromTileIdx(idx) {
-    let x = Math.floor(idx % Main.LEVEL_WIDTH)*Main.LEVEL_TILE_WIDTH + Main.LEVEL_TILE_WIDTH/2;
-    let y = Math.floor(idx / Main.LEVEL_WIDTH)*Main.LEVEL_TILE_HEIGHT + Main.LEVEL_TILE_HEIGHT/2;
-
-    return [x,y];
-}
-
-function checkIdx(idx, previousIdx, level) {
-    if (idx > level.length) {
-        return false;
-    }
-
-    if (idx == previousIdx) {
-        return false;
-    }
-
-    let tile = level[idx];
-    if (tile < 0) {
-        return false;
-    }
-
-    return true;
-}
-
-function buildPath(x, y, level) {
-    let start_idx = tileIdxFromXY(x,y);
-    let xy = xyFromTileIdx(start_idx);
-    let start_x = xy[0];
-    let start_y = xy[1];
-
-    path = [];
-    current_idx = start_idx;
-    previous_idx = -1;
-
-    i = level.length;
-    do {
-        let up_idx = current_idx - Main.LEVEL_WIDTH;
-        let down_idx = current_idx + Main.LEVEL_WIDTH;
-        let left_idx = current_idx - 1;
-        let right_idx = current_idx + 1;
-
-        if (checkIdx(up_idx, previous_idx, level)) {
-                // Up is ok
-                path.push(up_idx);
-                previous_idx = current_idx;
-                current_idx = up_idx
-        } else if (checkIdx(down_idx, previous_idx, level)) {
-            // Up is ok
-            path.push(down_idx);
-            previous_idx = current_idx;
-            current_idx = down_idx
-        } else if (checkIdx(left_idx, previous_idx, level)) {
-            // Up is ok
-            path.push(left_idx);
-            previous_idx = current_idx;
-            current_idx = left_idx
-        } else if (checkIdx(right_idx, previous_idx, level)) {
-            // Up is ok
-            path.push(right_idx);
-            previous_idx = current_idx;
-            current_idx = right_idx
-        } else {
-            console.log("Failed to find a valid path")
-        }
-
-        i -= 1;
-        if (i < 0) {
-            break;
-        }
-    } while (current_idx != start_idx);
-
-    return path;
-}
-
 function Main() {
 
     //Create a Pixi Application
@@ -259,51 +178,7 @@ Main.prototype.gameLoop = function(delta) {
         }    
     }
     
-    // Move computers car
-    let target_idx = this.computer1.path[this.computer1.target];
-    let current_idx = tileIdxFromXY(this.computer1.x, this.computer1.y);
-    if (target_idx == current_idx) {
-        // next target
-        this.computer1.target = (this.computer1.target + 1) % this.computer1.path.length; 
-    }
-
-    target_idx = this.computer1.path[this.computer1.target];
-    let xy = xyFromTileIdx(target_idx);
-    let target_x = xy[0];
-    let target_y = xy[1];
-
-    // compensate for tile being in the wrong direction
-    let target_angle = (Math.atan2(target_y - this.computer1.y, target_x - this.computer1.x) + Math.PI/2) * 180 / Math.PI;
-    let delta_angle = target_angle - this.computer1.angle;
-    if (delta_angle < -180) {
-        delta_angle += 360
-    }
-    if (delta_angle >= 360) {
-        delta_angle -= 360;
-    }
-
-    if (delta_angle < -0.5) {
-        this.computer1.angle = mod(this.computer1.angle - 1.2*Main.ROTATION_SPEED, 360);
-    }
-    if (delta_angle > 0.5) {
-        this.computer1.angle = mod(this.computer1.angle + 1.2*Main.ROTATION_SPEED, 360);
-    }
-
-    this.computer1.rotation = this.computer1.angle * Math.PI / 180.0;
-
-    this.computer1.vx = Math.cos(this.computer1.rotation - Math.PI/2) * this.computer1.speed;
-    this.computer1.vy = Math.sin(this.computer1.rotation - Math.PI/2) * this.computer1.speed;
-
-    newx = this.computer1.x + this.computer1.vx;
-    newy = this.computer1.y + this.computer1.vy;
-
-    this.computer1.x = newx;
-    this.computer1.y = newy;
-
-    this.computer1.speed += 1.15;
-    if (this.computer1.speed > Main.MAX_FORWARD_SPEED) {
-        this.computer1.speed = Main.MAX_FORWARD_SPEED;
-    }
+    this.computer1.update();
 
 
     this.update();
@@ -366,32 +241,17 @@ Main.prototype.setup = function() {
     this.car.angle = 0.0;
     this.app.stage.addChild(this.car)
 
-    this.computer1 = new PIXI.extras.AnimatedSprite(carList.slice(4,8));
+    this.computer1 = new ComputerCar(carList.slice(4,8));
     this.computer1.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
     this.computer1.y = Main.LEVEL_TILE_HEIGHT*6;
-    this.computer1.speed = 0;
-    this.computer1.vx = 0;
-    this.computer1.vy = 0;
-    this.computer1.anchor.set(0.5, 0.5);
-    this.computer1.angle = 0.0;
+    this.computer1.init(this.level, 0)
     this.app.stage.addChild(this.computer1)
 
-    this.computer1.path = buildPath(this.computer1.x, this.computer1.y, this.level);
-    this.computer1.target = 0;
-
-    this.computer2 = new PIXI.extras.AnimatedSprite(carList.slice(8,12));
+    this.computer2 = new ComputerCar(carList.slice(8,12));
     this.computer2.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
     this.computer2.y = Main.LEVEL_TILE_HEIGHT*7;
-    this.computer2.speed = 0;
-    this.computer2.vx = 0;
-    this.computer2.vy = 0;
-    this.computer2.anchor.set(0.5, 0.5);
-    this.computer2.angle = 0.0;
+    this.computer2.init(this.level, 0);
     this.app.stage.addChild(this.computer2)
-
-    
-
-    //this.scroller = new Scroller(this.stage);
 
     //Capture the keyboard arrow keys
     this.left = keyboard("ArrowLeft"),
