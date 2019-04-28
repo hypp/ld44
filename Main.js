@@ -87,6 +87,7 @@ function Main() {
 
     this.app = app
     this.stage = this.app.stage
+    this.state = Main.STATE_WAIT;
 
     //Add the canvas that Pixi automatically created for you to the HTML document
     document.body.appendChild(app.view);
@@ -100,12 +101,17 @@ function Main() {
 }
 
 Main.SCROLL_SPEED = 5;
-Main.ROTATION_SPEED = 3;
+Main.ROTATION_SPEED = 3.6;
 Main.MAX_FORWARD_SPEED = 2.1;
 Main.LEVEL_WIDTH = 20;
 Main.LEVEL_HEIGHT = 15;
 Main.LEVEL_TILE_WIDTH = 40;
 Main.LEVEL_TILE_HEIGHT = 40;
+
+Main.STATE_WAIT = 0;
+Main.STATE_LAPS = 1;
+Main.STATE_DONE = 2;
+
 
 Main.prototype.update = function() {
     //this.scroller.moveViewportXBy(Main.SCROLL_SPEED);
@@ -113,6 +119,19 @@ Main.prototype.update = function() {
 };
 
 Main.prototype.gameLoop = function(delta) {
+
+    if (this.state == Main.STATE_WAIT) {
+        // TODO count down and red traffic light
+
+        // Wait for player to press key
+        if (this.space.isDown) {
+            this.state = Main.STATE_LAPS;
+        } else {
+            // Nothing to do
+            return;
+        }
+    }
+
 
     if (this.up.isDown) {
         this.car.play()
@@ -250,6 +269,7 @@ Main.prototype.setup = function() {
         computer.y = Main.LEVEL_TILE_HEIGHT*(5+i);
         computer.init(this.level, 0)
         computer.max_forward_speed = Main.MAX_FORWARD_SPEED * (Math.random() * 0.1 + 0.9);
+        computer.rotation_speed = Main.ROTATION_SPEED * (Math.random() * 0.1 + 0.9);
         this.app.stage.addChild(computer);
         this.computerCars.push(computer);
     }
@@ -259,6 +279,7 @@ Main.prototype.setup = function() {
     this.up = keyboard("ArrowUp"),
     this.right = keyboard("ArrowRight"),
     this.down = keyboard("ArrowDown");
+    this.space = keyboard(" ");
 
     this.app.ticker.add(this.gameLoop.bind(this));
 }

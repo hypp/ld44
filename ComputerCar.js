@@ -137,10 +137,10 @@ ComputerCar.prototype.update = function() {
     }
 
     if (delta_angle < -0.5) {
-        this.angle = mod(this.angle - 1.2*Main.ROTATION_SPEED, 360);
+        this.angle = mod(this.angle - this.rotation_speed, 360);
     }
     if (delta_angle > 0.5) {
-        this.angle = mod(this.angle + 1.2*Main.ROTATION_SPEED, 360);
+        this.angle = mod(this.angle + this.rotation_speed, 360);
     }
 
     this.rotation = this.angle * Math.PI / 180.0;
