@@ -14,6 +14,8 @@ function GameScene(sceneManager) {
     this.isShooting = true; // Avoid firing first bullet
     this.bullets = [];
 
+    this.end_delay = 60*10; // About 10 seconds
+
 }
 
 GameScene.ROTATION_SPEED = 3.6;
@@ -22,7 +24,8 @@ GameScene.ACCELERATION = 0.1;
 GameScene.BULLET_SPEED = GameScene.MAX_FORWARD_SPEED * 1.5;
 GameScene.STATE_WAIT = 0;
 GameScene.STATE_LAPS = 1;
-GameScene.STATE_DONE = 2;
+GameScene.STATE_PLAYER_WIN = 2;
+GameScene.STATE_PLAYER_DIED = 3;
 
 
 GameScene.prototype = Object.create(PIXI.Container.prototype);
@@ -98,6 +101,16 @@ GameScene.prototype.init = function() {
         this.computerCars.push(computer);
     }
 
+    style = new PIXI.TextStyle({
+        fontSize: 12,
+        fill: "#ff9300"
+    });
+
+    this.health = 100;
+
+    this.hud = new PIXI.Text("Health: " + this.health, style);   
+    this.addChild(this.hud);
+
 }
 
 GameScene.prototype.gameLoop = function(delta) {
@@ -112,7 +125,26 @@ GameScene.prototype.gameLoop = function(delta) {
             return;
         }
     }
+    if (this.state == GameScene.STATE_LAPS) {
+        this.doGameState(delta);
+    }
+    if (this.state == GameScene.STATE_PLAYER_DIED) {
+        this.end_delay--;
+        if (this.end_delay == 0) {
+            this.sceneManager.next();
+        }
+    }
+    if (this.state == GameScene.STATE_PLAYER_WIN) {
+        this.end_delay--;
+        if (this.end_delay == 0) {
+            this.sceneManager.next();
+        }
+    }
+}
 
+
+
+GameScene.prototype.doGameState = function(delta) {
 
     if (this.up.isDown) {
         this.car.play()
@@ -143,6 +175,7 @@ GameScene.prototype.gameLoop = function(delta) {
             this.isShooting = true;
 
             this.shoot();
+            this.health -= 1;
         }
     } else {
         if (this.space.isUp) {
@@ -218,7 +251,6 @@ GameScene.prototype.gameLoop = function(delta) {
             let distanceSquared = dx*dx + dy*dy;
 
             if (distanceSquared < (shieldSquared + shieldSquared)) {
-                // We have a collision
                 if (carB.bounding_circle == null) {    
                     var graphics = new PIXI.Graphics();
                     graphics.lineStyle(1, 0xffffff, 1);
@@ -238,6 +270,10 @@ GameScene.prototype.gameLoop = function(delta) {
 
             if (distanceSquared < (radiusSquared + radiusSquared)) {
                 // We have a collision
+
+                if (this.car == carA || this.car == carB) {
+                    this.health -= 2;
+                }
     
                 // TODO Add a particle effect here
                 // Assume bounding circles have same size
@@ -279,6 +315,22 @@ GameScene.prototype.gameLoop = function(delta) {
         }
     }
 
+    if (this.health < 0) {
+        this.health = 0;
+    }
+
+    // Check end game conditions
+    if (this.health == 0) {
+        // Player has no health
+        this.state = GameScene.STATE_PLAYER_DIED;
+    }
+
+    if (this.computerCars.length == 1) {
+        // Only player left
+        this.state = GameScene.STATE_PLAYER_WIN;
+    }
+
+    this.hud.text = "Health: " + this.health;
 }
 
 
