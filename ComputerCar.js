@@ -151,6 +151,12 @@ ComputerCar.prototype.update = function() {
     newx = this.x + this.vx;
     newy = this.y + this.vy;
 
+    this.setPos(newx, newy);
+}
+
+// Set x or y, if the do not move into forbidden tile
+// TODO this is same as PlayerCar.setPos
+ComputerCar.prototype.setPos = function(newx, newy) {
     current_tile_x = Math.floor(this.x / Main.LEVEL_TILE_WIDTH);
     current_tile_y = Math.floor(this.y / Main.LEVEL_TILE_HEIGHT);
 
@@ -181,5 +187,4 @@ ComputerCar.prototype.update = function() {
             this.y = newy;
         }    
     }
-
 }

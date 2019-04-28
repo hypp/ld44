@@ -285,8 +285,8 @@ Main.prototype.setup = function() {
     this.car.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
     this.car.y = Main.LEVEL_TILE_HEIGHT*4;
     this.car.init(this.level);
-    this.car.max_forward_speed = Main.MAX_FORWARD_SPEED * 0.8;
-    this.car.rotation_speed = Main.ROTATION_SPEED * 0.8;
+    this.car.max_forward_speed = Main.MAX_FORWARD_SPEED * 0.5;
+    this.car.rotation_speed = Main.ROTATION_SPEED * 0.5;
     this.app.stage.addChild(this.car)
     this.computerCars.push(this.car);
 
