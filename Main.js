@@ -200,6 +200,47 @@ Main.prototype.gameLoop = function(delta) {
     let shieldSquared = (radius+2)*(radius+2);
     let expectedDistance = radius+radius;
 
+    let bulletRadius = 2;
+    let bulletRadiusSquared = bulletRadius*bulletRadius;
+
+    // Bullet against cars
+    // Loop backwards so we can delete old entries
+    for(var b = this.bullets.length-1; b >= 0; b--) {
+        let bullet = this.bullets[b];
+        let hit = false;
+        for (let i = this.computerCars.length-1; i >= 0; i-- ) {
+            let car = this.computerCars[i];
+
+            if (car == this.car) {
+                continue;
+            }
+
+            let dx = bullet.x - car.x;
+            let dy = bullet.y - car.y;
+
+            let distanceSquared = dx*dx + dy*dy;
+
+            if (distanceSquared < (bulletRadiusSquared + radiusSquared)) {
+                hit = true;
+
+                // remove car
+                this.computerCars.splice(i,1);
+                this.stage.removeChild(car);
+
+                // TODO add explosion
+
+                break;
+            }
+        }
+        if (hit) {
+            this.bullets.splice(b,1);
+            this.stage.removeChild(bullet);
+        }
+    }
+
+
+
+    // Cars against cars
     for (let i = 0; i < this.computerCars.length; i++) {
         let carA = this.computerCars[i];
 
