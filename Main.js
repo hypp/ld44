@@ -85,8 +85,19 @@ function Main() {
     }
     );
 
-    this.app = app
-    this.stage = this.app.stage
+    this.app = app;
+
+    this.introScene = new PIXI.Container();
+    this.introScene.visible = false;
+    this.app.stage.addChild(this.introScene);
+    this.gameScene = new PIXI.Container();
+    this.gameScene.visible = true;
+    this.app.stage.addChild(this.gameScene);
+    this.endScene = new PIXI.Container();
+    this.endScene.visible = false;
+    this.app.stage.addChild(this.endScene);
+
+
     this.state = Main.STATE_WAIT;
     this.isShooting = true; // Avoid firing first bullet
     this.bullets = [];
@@ -103,8 +114,9 @@ function Main() {
 
     // Load some music
     PIXI.sound.Sound.from({
-        url: 'resources/ld44a.mp3',
-        autoPlay: true,
+        url: 'resources/ld44.mp3',
+        autoPlay: false,
+        loop: true,
         complete: function() {
             console.log('Sound finished');
         }
@@ -129,7 +141,7 @@ Main.STATE_DONE = 2;
 Main.prototype.shoot = function() {
 
     var bullet = new Bullet("resources/bullet.png", this.level, this.app, this.car);
-    this.stage.addChild(bullet);
+    this.gameScene.addChild(bullet);
     this.bullets.push(bullet);
 }
 
@@ -188,7 +200,7 @@ Main.prototype.gameLoop = function(delta) {
         element.my_update();
         if (element.bounding_circle == null) {
         } else {
-            this.stage.removeChild(element.bounding_circle);
+            this.gameScene.removeChild(element.bounding_circle);
             element.bounding_circle = null;
         }
     });
@@ -224,7 +236,7 @@ Main.prototype.gameLoop = function(delta) {
 
                 // remove car
                 this.computerCars.splice(i,1);
-                this.stage.removeChild(car);
+                this.gameScene.removeChild(car);
 
                 // TODO add explosion
 
@@ -233,7 +245,7 @@ Main.prototype.gameLoop = function(delta) {
         }
         if (hit) {
             this.bullets.splice(b,1);
-            this.stage.removeChild(bullet);
+            this.gameScene.removeChild(bullet);
         }
     }
 
@@ -257,7 +269,7 @@ Main.prototype.gameLoop = function(delta) {
                     var graphics = new PIXI.Graphics();
                     graphics.lineStyle(1, 0xffffff, 1);
                     graphics.drawCircle(carB.x, carB.y, radius);
-                    this.stage.addChild(graphics);
+                    this.gameScene.addChild(graphics);
                     carB.bounding_circle = graphics;
                 }
 
@@ -265,7 +277,7 @@ Main.prototype.gameLoop = function(delta) {
                     var graphics = new PIXI.Graphics();
                     graphics.lineStyle(1, 0xffffff, 1);
                     graphics.drawCircle(carA.x, carA.y, radius);
-                    this.stage.addChild(graphics);
+                    this.gameScene.addChild(graphics);
                     carA.bounding_circle = graphics;
                 }
             }
@@ -308,12 +320,12 @@ Main.prototype.gameLoop = function(delta) {
         bullet.my_update();
 
         if (!bullet.isAlive) {
-            this.stage.removeChild(bullet);
+            this.gameScene.removeChild(bullet);
             this.bullets.splice(b, 1);
         }
     }
 
-    this.app.renderer.render(this.stage);
+    this.app.renderer.render(this.app.stage);
 }
 
 Main.prototype.setup = function() {
@@ -355,7 +367,7 @@ Main.prototype.setup = function() {
                 road.x = x;
                 road.y = y;
         
-                this.app.stage.addChild(road)
+                this.gameScene.addChild(road)
             }
         }    
     }
@@ -371,7 +383,7 @@ Main.prototype.setup = function() {
     this.car.init(this.level);
     this.car.max_forward_speed = Main.MAX_FORWARD_SPEED;
     this.car.rotation_speed = Main.ROTATION_SPEED * 0.9;
-    this.app.stage.addChild(this.car)
+    this.gameScene.addChild(this.car)
     this.computerCars.push(this.car);
 
     for (let i = 0; i < 6; i++) {
@@ -382,7 +394,7 @@ Main.prototype.setup = function() {
         computer.init(this.level, 0)
         computer.max_forward_speed = Main.MAX_FORWARD_SPEED * (Math.random() * 0.3 + 0.7);
         computer.rotation_speed = Main.ROTATION_SPEED * (Math.random() * 0.3 + 0.7);
-        this.app.stage.addChild(computer);
+        this.gameScene.addChild(computer);
         this.computerCars.push(computer);
     }
 
