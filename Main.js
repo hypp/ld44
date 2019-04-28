@@ -136,16 +136,22 @@ Main.prototype.gameLoop = function(delta) {
     if (this.up.isDown) {
         this.car.play()
 
-        this.car.speed += 1.15;
-        if (this.car.speed > Main.MAX_FORWARD_SPEED) {
-            this.car.speed = Main.MAX_FORWARD_SPEED;
+        if (this.car.speed > this.car.max_forward_speed) {
+            // If we gained speed from some other means
+            // typically collision
+            this.car.speed -= 0.1;
+        } else {
+            this.car.speed += 1.15;
+            if (this.car.speed > this.car.max_forward_speed) {
+                this.car.speed = this.car.max_forward_speed;
+            }
         }
 
         if (this.left.isDown) {
-            this.car.angle = mod(this.car.angle - Main.ROTATION_SPEED / delta, 360);
+            this.car.angle = mod(this.car.angle - this.car.rotation_speed / delta, 360);
         }
         if (this.right.isDown) {
-            this.car.angle = mod(this.car.angle + Main.ROTATION_SPEED / delta, 360);
+            this.car.angle = mod(this.car.angle + this.car.rotation_speed / delta, 360);
         }
     
     } else {
@@ -157,49 +163,71 @@ Main.prototype.gameLoop = function(delta) {
         }
     }
 
-    this.car.rotation = this.car.angle * Math.PI / 180.0;
-
-    // compensate for tile being in the wrong direction
-    this.car.vx = Math.cos(this.car.rotation - Math.PI/2) * this.car.speed;
-    this.car.vy = Math.sin(this.car.rotation - Math.PI/2) * this.car.speed;
-
-    newx = this.car.x + this.car.vx;
-    newy = this.car.y + this.car.vy;
-
-    current_tile_x = Math.floor(this.car.x / Main.LEVEL_TILE_WIDTH);
-    current_tile_y = Math.floor(this.car.y / Main.LEVEL_TILE_HEIGHT);
-
-    new_tile_x = Math.floor(newx / Main.LEVEL_TILE_WIDTH);
-    new_tile_y = Math.floor(newy / Main.LEVEL_TILE_HEIGHT);
-
-    if (new_tile_x == current_tile_x && new_tile_y == current_tile_y) {
-        // Safe to allow both
-        this.car.x = newx;
-        this.car.y = newy;
-    } else if (new_tile_x != current_tile_x && new_tile_y != current_tile_y) {
-        // Both have changed, never allowed, diagonal movement
-        // Edge case
-    } else {
-        if (new_tile_x == current_tile_x) {
-            // Safe to allow x
-            this.car.x = newx;
-        } else if (new_tile_y == current_tile_y) {
-            // Safe to allow y
-            this.car.y = newy;
-        } 
-
-        // We must still check!
-        idx = new_tile_y*Main.LEVEL_WIDTH+new_tile_x;
-        tile = this.level[idx];
-        if (tile >= 0) {
-            this.car.x = newx;
-            this.car.y = newy;
-        }    
-    }
-    
     this.computerCars.forEach(element => {
         element.update();
+        if (element.bounding_circle == null) {
+        } else {
+            this.stage.removeChild(element.bounding_circle);
+            element.bounding_circle = null;
+        }
     });
+
+    // brute force collision detection
+    let radius = 8;
+    let radiusSquared = radius*radius;
+
+    for (let i = 0; i < this.computerCars.length; i++) {
+        let carA = this.computerCars[i];
+
+        for (let j = i+1; j < this.computerCars.length; j++) {
+            let carB = this.computerCars[j];
+
+            let dx = carA.x - carB.x;
+            let dy = carA.y - carB.y;
+
+            let distanceSquared = dx*dx + dy*dy;
+            if (distanceSquared < (radiusSquared + radiusSquared)) {
+                // We have a collision
+
+                if (carB.bounding_circle == null) {    
+                    var graphics = new PIXI.Graphics();
+                    graphics.lineStyle(1, 0xffffff, 1);
+                    graphics.drawCircle(carB.x, carB.y, radius);
+                    this.stage.addChild(graphics);
+                    carB.bounding_circle = graphics;
+                }
+
+                if (carA.bounding_circle == null) {    
+                    var graphics = new PIXI.Graphics();
+                    graphics.lineStyle(1, 0xffffff, 1);
+                    graphics.drawCircle(carA.x, carA.y, radius);
+                    this.stage.addChild(graphics);
+                    carA.bounding_circle = graphics;
+                }
+
+                // TODO Add a particle effect here
+                // Assume bounding circles have same size
+                // Then we only have to dvide by 2
+                var cpX = (carA.x + carB.x) / 2;
+                var cpY = (carA.y + carB.y) / 2;
+
+                var distance = Math.sqrt(distanceSquared);
+                var ratio = distance / (radiusSquared);
+
+                // Move them apart
+                carA.x -= distance * ratio * 0.5;
+                carA.y -= distance * ratio * 0.5;
+
+                carB.x += distance * ratio * 0.5;
+                carB.y += distance * ratio * 0.5;
+   
+//                let tmp = carB.speed;
+//                carB.speed = carA.speed;
+//                carA.speed = tmp;
+
+            }
+        }    
+    }
 
     this.update();
 }
@@ -249,19 +277,19 @@ Main.prototype.setup = function() {
     }
 
 
+    this.computerCars = []
+
     carList = tilesFromImage("resources/cars.png", 16, 32);
 
-    this.car = new PIXI.extras.AnimatedSprite(carList.slice(0,4));
+    this.car = new PlayerCar(carList.slice(0,4));
     this.car.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
     this.car.y = Main.LEVEL_TILE_HEIGHT*4;
-    this.car.speed = 0;
-    this.car.vx = 0;
-    this.car.vy = 0;
-    this.car.anchor.set(0.5, 0.5);
-    this.car.angle = 0.0;
+    this.car.init(this.level);
+    this.car.max_forward_speed = Main.MAX_FORWARD_SPEED * 0.8;
+    this.car.rotation_speed = Main.ROTATION_SPEED * 0.8;
     this.app.stage.addChild(this.car)
+    this.computerCars.push(this.car);
 
-    this.computerCars = []
     for (let i = 0; i < 4; i++) {
         let texture_offset = (i % 2) * 4 + 4
         let computer = new ComputerCar(carList.slice(texture_offset,texture_offset+4)); 
