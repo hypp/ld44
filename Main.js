@@ -1,5 +1,11 @@
 
 
+// proper modulo
+function mod(n, m) {
+    return ((n % m) + m) % m;
+}
+
+
 // Utility function to split png into tiles
 function tilesFromImage(img, width, height) {
     let tiles = [];
@@ -198,10 +204,10 @@ Main.prototype.gameLoop = function(delta) {
         }
 
         if (this.left.isDown) {
-            this.car.angle = (this.car.angle - Main.ROTATION_SPEED / delta) % 360;
+            this.car.angle = mod(this.car.angle - Main.ROTATION_SPEED / delta, 360);
         }
         if (this.right.isDown) {
-            this.car.angle = (this.car.angle + Main.ROTATION_SPEED / delta) % 360;
+            this.car.angle = mod(this.car.angle + Main.ROTATION_SPEED / delta, 360);
         }
     
     } else {
@@ -215,6 +221,7 @@ Main.prototype.gameLoop = function(delta) {
 
     this.car.rotation = this.car.angle * Math.PI / 180.0;
 
+    // compensate for tiling being in the wrong direction
     this.car.vx = Math.cos(this.car.rotation - Math.PI/2) * this.car.speed;
     this.car.vy = Math.sin(this.car.rotation - Math.PI/2) * this.car.speed;
 
@@ -253,6 +260,46 @@ Main.prototype.gameLoop = function(delta) {
     }
     
     // Move computers car
+    let target_idx = this.computer1.path[this.computer1.target];
+    let current_idx = tileIdxFromXY(this.computer1.x, this.computer1.y);
+    if (target_idx == current_idx) {
+        // next target
+        this.computer1.target = (this.computer1.target + 1) % this.computer1.path.length; 
+    }
+
+    target_idx = this.computer1.path[this.computer1.target];
+    let xy = xyFromTileIdx(target_idx);
+    let target_x = xy[0];
+    let target_y = xy[1];
+
+    // compensate for tile being in the wrong direction
+    let target_angle = (Math.atan2(target_y - this.computer1.y, target_x - this.computer1.x) + Math.PI/2) * 180 / Math.PI;
+    let delta_angle = target_angle - this.computer1.angle;
+    if (delta_angle < -180) {
+        delta_angle += 360
+    }
+    if (delta_angle >= 360) {
+        delta_angle -= 360;
+    }
+
+    if (delta_angle < 0) {
+        this.computer1.angle = mod(this.computer1.angle - 2*Main.ROTATION_SPEED, 360);
+    }
+    if (delta_angle > 0) {
+        this.computer1.angle = mod(this.computer1.angle + 2*Main.ROTATION_SPEED, 360);
+    }
+
+    this.computer1.rotation = this.computer1.angle * Math.PI / 180.0;
+
+    this.computer1.vx = Math.cos(this.computer1.rotation - Math.PI/2) * this.computer1.speed;
+    this.computer1.vy = Math.sin(this.computer1.rotation - Math.PI/2) * this.computer1.speed;
+
+    newx = this.computer1.x + this.computer1.vx;
+    newy = this.computer1.y + this.computer1.vy;
+
+    this.computer1.x = newx;
+    this.computer1.y = newy;
+
     this.computer1.speed += 1.15;
     if (this.computer1.speed > Main.MAX_FORWARD_SPEED) {
         this.computer1.speed = Main.MAX_FORWARD_SPEED;
@@ -330,7 +377,7 @@ Main.prototype.setup = function() {
     this.app.stage.addChild(this.computer1)
 
     this.computer1.path = buildPath(this.computer1.x, this.computer1.y, this.level);
-    this.computer1.target = 2;
+    this.computer1.target = 0;
 
     this.computer2 = new PIXI.extras.AnimatedSprite(carList.slice(8,12));
     this.computer2.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
