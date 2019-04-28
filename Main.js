@@ -140,7 +140,7 @@ Main.prototype.gameLoop = function(delta) {
 
     this.car.rotation = this.car.angle * Math.PI / 180.0;
 
-    // compensate for tiling being in the wrong direction
+    // compensate for tile being in the wrong direction
     this.car.vx = Math.cos(this.car.rotation - Math.PI/2) * this.car.speed;
     this.car.vy = Math.sin(this.car.rotation - Math.PI/2) * this.car.speed;
 
@@ -178,9 +178,9 @@ Main.prototype.gameLoop = function(delta) {
         }    
     }
     
-    this.computer1.update();
-    this.computer2.update();
-
+    this.computerCars.forEach(element => {
+        element.update();
+    });
 
     this.update();
 }
@@ -234,7 +234,7 @@ Main.prototype.setup = function() {
 
     this.car = new PIXI.extras.AnimatedSprite(carList.slice(0,4));
     this.car.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
-    this.car.y = Main.LEVEL_TILE_HEIGHT*5;
+    this.car.y = Main.LEVEL_TILE_HEIGHT*4;
     this.car.speed = 0;
     this.car.vx = 0;
     this.car.vy = 0;
@@ -242,17 +242,17 @@ Main.prototype.setup = function() {
     this.car.angle = 0.0;
     this.app.stage.addChild(this.car)
 
-    this.computer1 = new ComputerCar(carList.slice(4,8));
-    this.computer1.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
-    this.computer1.y = Main.LEVEL_TILE_HEIGHT*6;
-    this.computer1.init(this.level, 0)
-    this.app.stage.addChild(this.computer1)
-
-    this.computer2 = new ComputerCar(carList.slice(8,12));
-    this.computer2.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
-    this.computer2.y = Main.LEVEL_TILE_HEIGHT*7;
-    this.computer2.init(this.level, 0);
-    this.app.stage.addChild(this.computer2)
+    this.computerCars = []
+    for (let i = 0; i < 4; i++) {
+        let texture_offset = (i % 2) * 4 + 4
+        let computer = new ComputerCar(carList.slice(texture_offset,texture_offset+4)); 
+        computer.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
+        computer.y = Main.LEVEL_TILE_HEIGHT*(5+i);
+        computer.init(this.level, 0)
+        computer.max_forward_speed = Main.MAX_FORWARD_SPEED;
+        this.app.stage.addChild(computer);
+        this.computerCars.push(computer);
+    }
 
     //Capture the keyboard arrow keys
     this.left = keyboard("ArrowLeft"),

@@ -109,7 +109,11 @@ ComputerCar.prototype.init = function(level, target) {
 }
 
 ComputerCar.prototype.update = function() {
-    // Move computers car
+    this.speed += 1.15;
+    if (this.speed > this.max_forward_speed) {
+        this.speed = this.max_forward_speed;
+    }
+
     let target_idx = this.path[this.target];
     let current_idx = tileIdxFromXY(this.x, this.y);
     if (target_idx == current_idx) {
@@ -147,13 +151,35 @@ ComputerCar.prototype.update = function() {
     newx = this.x + this.vx;
     newy = this.y + this.vy;
 
-    this.x = newx;
-    this.y = newy;
+    current_tile_x = Math.floor(this.x / Main.LEVEL_TILE_WIDTH);
+    current_tile_y = Math.floor(this.y / Main.LEVEL_TILE_HEIGHT);
 
-    this.speed += 1.15;
-    if (this.speed > Main.MAX_FORWARD_SPEED) {
-        this.speed = Main.MAX_FORWARD_SPEED;
+    new_tile_x = Math.floor(newx / Main.LEVEL_TILE_WIDTH);
+    new_tile_y = Math.floor(newy / Main.LEVEL_TILE_HEIGHT);
+
+    if (new_tile_x == current_tile_x && new_tile_y == current_tile_y) {
+        // Safe to allow both
+        this.x = newx;
+        this.y = newy;
+    } else if (new_tile_x != current_tile_x && new_tile_y != current_tile_y) {
+        // Both have changed, never allowed, diagonal movement
+        // Edge case
+    } else {
+        if (new_tile_x == current_tile_x) {
+            // Safe to allow x
+            this.x = newx;
+        } else if (new_tile_y == current_tile_y) {
+            // Safe to allow y
+            this.y = newy;
+        } 
+
+        // We must still check!
+        idx = new_tile_y*Main.LEVEL_WIDTH+new_tile_x;
+        tile = this.level[idx];
+        if (tile >= 0) {
+            this.x = newx;
+            this.y = newy;
+        }    
     }
-
 
 }
