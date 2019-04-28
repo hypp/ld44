@@ -131,19 +131,10 @@ function Main() {
     });
 }
 
-Main.SCROLL_SPEED = 5;
-Main.ROTATION_SPEED = 3.6;
-Main.MAX_FORWARD_SPEED = 2.1;
 Main.LEVEL_WIDTH = 20;
 Main.LEVEL_HEIGHT = 15;
 Main.LEVEL_TILE_WIDTH = 48;
 Main.LEVEL_TILE_HEIGHT = 48;
-Main.ACCELERATION = 0.1;
-Main.BULLET_SPEED = Main.MAX_FORWARD_SPEED * 1.5;
-
-Main.STATE_WAIT = 0;
-Main.STATE_LAPS = 1;
-Main.STATE_DONE = 2;
 
 SceneManager = {};
 

@@ -116,7 +116,7 @@ ComputerCar.prototype.my_update = function() {
         this.play();
     }
 
-    this.speed += Main.ACCELERATION;
+    this.speed += GameScene.ACCELERATION;
     if (this.speed > this.max_forward_speed) {
         this.speed = this.max_forward_speed;
     }

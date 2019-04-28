@@ -10,11 +10,20 @@ function GameScene(sceneManager) {
     this.down = sceneManager.down;
     this.space = sceneManager.space;
 
-    this.state = Main.STATE_WAIT;
+    this.state = GameScene.STATE_WAIT;
     this.isShooting = true; // Avoid firing first bullet
     this.bullets = [];
 
 }
+
+GameScene.ROTATION_SPEED = 3.6;
+GameScene.MAX_FORWARD_SPEED = 2.1;
+GameScene.ACCELERATION = 0.1;
+GameScene.BULLET_SPEED = GameScene.MAX_FORWARD_SPEED * 1.5;
+GameScene.STATE_WAIT = 0;
+GameScene.STATE_LAPS = 1;
+GameScene.STATE_DONE = 2;
+
 
 GameScene.prototype = Object.create(PIXI.Container.prototype);
 
@@ -72,8 +81,8 @@ GameScene.prototype.init = function() {
     this.car.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
     this.car.y = Main.LEVEL_TILE_HEIGHT*4;
     this.car.init(this.level);
-    this.car.max_forward_speed = Main.MAX_FORWARD_SPEED;
-    this.car.rotation_speed = Main.ROTATION_SPEED * 0.9;
+    this.car.max_forward_speed = GameScene.MAX_FORWARD_SPEED;
+    this.car.rotation_speed = GameScene.ROTATION_SPEED * 0.9;
     this.addChild(this.car)
     this.computerCars.push(this.car);
 
@@ -83,8 +92,8 @@ GameScene.prototype.init = function() {
         computer.x = Main.LEVEL_TILE_WIDTH*6+Main.LEVEL_TILE_WIDTH/2;
         computer.y = Main.LEVEL_TILE_HEIGHT*4+(i+1)*32; // car heigh = 32
         computer.init(this.level, 0)
-        computer.max_forward_speed = Main.MAX_FORWARD_SPEED * (Math.random() * 0.3 + 0.7);
-        computer.rotation_speed = Main.ROTATION_SPEED * (Math.random() * 0.3 + 0.7);
+        computer.max_forward_speed = GameScene.MAX_FORWARD_SPEED * (Math.random() * 0.3 + 0.7);
+        computer.rotation_speed = GameScene.ROTATION_SPEED * (Math.random() * 0.3 + 0.7);
         this.addChild(computer);
         this.computerCars.push(computer);
     }
@@ -92,12 +101,12 @@ GameScene.prototype.init = function() {
 }
 
 GameScene.prototype.gameLoop = function(delta) {
-    if (this.state == Main.STATE_WAIT) {
+    if (this.state == GameScene.STATE_WAIT) {
         // TODO count down and red traffic light
 
         // Wait for player to press key
         if (this.space.isDown) {
-            this.state = Main.STATE_LAPS;
+            this.state = GameScene.STATE_LAPS;
         } else {
             // Nothing to do
             return;
@@ -108,7 +117,7 @@ GameScene.prototype.gameLoop = function(delta) {
     if (this.up.isDown) {
         this.car.play()
 
-        this.car.speed += Main.ACCELERATION;
+        this.car.speed += GameScene.ACCELERATION;
         if (this.car.speed > this.car.max_forward_speed) {
             this.car.speed = this.car.max_forward_speed;
         }
