@@ -120,12 +120,7 @@ Main.STATE_DONE = 2;
 
 Main.prototype.shoot = function() {
 
-    var bullet = new Bullet("resources/bullet.png", this.level, this.app);
-    bullet.x = this.car.x;
-    bullet.y = this.car.y;
-    bullet.anchor.set(0.5,0.5);
-    bullet.rotation = this.car.rotation;
-    bullet.speed = this.car.speed*1.5;
+    var bullet = new Bullet("resources/bullet.png", this.level, this.app, this.car);
     this.stage.addChild(bullet);
     this.bullets.push(bullet);
 }
