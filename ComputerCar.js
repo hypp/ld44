@@ -95,6 +95,8 @@ function ComputerCar(textures) {
     this.vy = 0;
     this.anchor.set(0.5, 0.5);
     this.angle = 0.0;
+
+    this.stop();
 }
 
 ComputerCar.prototype = Object.create(PIXI.extras.AnimatedSprite.prototype);
@@ -109,6 +111,11 @@ ComputerCar.prototype.init = function(level, target) {
 }
 
 ComputerCar.prototype.update = function() {
+
+    if (this.speed > 0) {
+        this.play();
+    }
+
     this.speed += Main.ACCELERATION;
     if (this.speed > this.max_forward_speed) {
         this.speed = this.max_forward_speed;
