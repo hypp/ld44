@@ -101,6 +101,14 @@ function Main() {
     .add("resources/bullet.png")
     .load(this.setup.bind(this));
 
+    // Load some music
+    PIXI.sound.Sound.from({
+        url: 'resources/ld44a.mp3',
+        autoPlay: true,
+        complete: function() {
+            console.log('Sound finished');
+        }
+    });
 }
 
 Main.SCROLL_SPEED = 5;
